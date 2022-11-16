@@ -1,4 +1,5 @@
 import numpy as np
+from .utils import *
 
 
 def pca(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
@@ -8,4 +9,15 @@ def pca(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     :return:
     """
 
-    """Step 1: Create Casorati matrix with size n ** 2 x ndyn"""
+    """ Step 1: Create column-wise mean-centered casorati_matrix C_tilde """
+    C_tilde = step1(img, mask)
+
+
+def step1(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
+    """
+    # Create casorati matrix and Subtract Z_mean to obtain column-wise mean-centered casorati_matrix C_tilde
+    """
+    casorati_matrix = img_to_casorati_matrix(img, mask)
+    Z_mean = casorati_matrix.mean(axis=0)
+    casorati_matrix -= Z_mean
+    return casorati_matrix
