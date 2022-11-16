@@ -1,2 +1,4 @@
-# CESTDeNoise
-Noise Reduction Tool for CEST MRI Data
+# DeNoise
+Noise reduction tool for MRI data - optimized for CEST-MRI
+
+## !!! Currently in progress !!!
