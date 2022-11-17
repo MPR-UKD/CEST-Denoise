@@ -1,8 +1,9 @@
 import numpy as np
 from .utils import *
+from .criteria import *
 
 
-def pca(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
+def pca(img: np.ndarray, mask: np.ndarray, criteria: str) -> np.ndarray:
     """
     :param img: noisy 2D CEST image (x,y,ndyn)
     :param mask: 2D binary mask (x,y)
@@ -13,6 +14,8 @@ def pca(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     C_tilde = step1(img, mask)
     """ Step 2: Principal component analysis - calc eigvals and eigvecs"""
     eigvals, eigvecs = step2(C_tilde)
+    """ Step 3: Determine optimal number of components k """
+    k = step3(eigvals, C_tilde, criteria)
 
 
 def step1(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
@@ -30,3 +33,14 @@ def step2(C_tilde):
     cov_C_tilde = np.cov(C_tilde)
     eigvals, eigvecs = calc_eig(cov_C_tilde, 'max')
     return eigvals, eigvecs
+
+
+def step3(eigenvalues: np.ndarray, C_tilde: np.ndarray, criteria: str):
+    if criteria == 'malinowski':
+        return malinowski_criteria(eigenvalues, C_tilde.shape)
+    if criteria == 'nelson':
+        return nelson_criteria(eigenvalues, C_tilde.shape)
+    if criteria == 'median':
+        return median_criteria(eigenvalues)
+    raise ValueError(f'Criteria: {criteria} is not implemented! Currently are "malinowski", "nelson" and "median"'
+                     f'criteria available')
