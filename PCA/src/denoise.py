@@ -11,21 +11,24 @@ def pca(img: np.ndarray, criteria: str, mask: np.ndarray | None = None) -> np.nd
     """
 
     """ Step 1: Create column-wise mean-centered casorati_matrix C_tilde """
-    C_tilde = step1(img, mask)
+    C_tilde, Z_mean = step1(img, mask)
     """ Step 2: Principal component analysis - calc eigvals and eigvecs"""
     eigvals, eigvecs = step2(C_tilde)
     """ Step 3: Determine optimal number of components k """
     k = step3(eigvals, C_tilde, criteria)
+    """Step 4: Projection onto remaining components"""
+    step4(C_tilde, Z_mean, eigvecs, k)
 
 
-def step1(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
+
+def step1(img: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
     # Create casorati matrix and Subtract Z_mean to obtain column-wise mean-centered casorati_matrix C_tilde
     """
     casorati_matrix = img_to_casorati_matrix(img, mask)
     Z_mean = casorati_matrix.mean(axis=0)
     casorati_matrix -= Z_mean
-    return casorati_matrix
+    return casorati_matrix, Z_mean
 
 
 def step2(C_tilde):
@@ -44,3 +47,10 @@ def step3(eigenvalues: np.ndarray, C_tilde: np.ndarray, criteria: str):
         return median_criteria(eigenvalues)
     raise ValueError(f'Criteria: {criteria} is not implemented! Currently are "malinowski", "nelson" and "median"'
                      f'criteria available')
+def step4(C_tilde, Z_mean, eigvecs, k):
+    C = C_tilde.copy()
+    for i in range(C_tilde.shape[0]):
+        C_tilde[i] = np.array([np.dot(C_tilde[i], np.dot(np.transpose(np.expand_dims(eigvecs[:, ii], axis=0)),
+                                                         np.expand_dims(eigvecs[:, ii], axis=0))) for ii in range(k)]
+                              ).sum(axis=0) + Z_mean
+    return C_tilde
