@@ -1,5 +1,5 @@
 import numpy as np
-
+from matplotlib import pyplot as plt
 
 def malinowski_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
     """Based on a theory of error concerning abstact factor analysis"""
@@ -25,7 +25,7 @@ def malinowski_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
 
 def nelson_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
     """Based on the shape of the course of the eigenvalues plotted as a diminishing series"""
-    r_list = []
+    r2_list = []
     l_ist = np.arange(len(eigvals))
     for k in range(C_tilde_shape[1] - 1):
         l = k + 1
@@ -39,17 +39,16 @@ def nelson_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
             ((C_tilde_shape[1] - k) * eigvals_sum_squared - eigvals_sum ** 2))
         if denominator != 0:
             r_squared = (numerator / denominator) ** 2
-            r_list.append(r_squared)
-    r_list = np.array(r_list)
+            r2_list.append(r_squared)
 
-    for i in range(len(r_list) - 1):
-        dif = r_list[i + 1] - r_list[i]
-        if dif > 0:
+    for i in range(len(r2_list) - 1):
+        dif = r2_list[i + 1] - r2_list[i]
+        if dif > 0 or r2_list[i] < 0.8:
             continue
         else:
-            k_reg = np.where(r_list == r_list[i])[0]
-            break
-    return k_reg[0]
+            return i
+    return len(r2_list)
+
 
 
 def median_criteria(eigvals: np.ndarray):
@@ -58,28 +57,7 @@ def median_criteria(eigvals: np.ndarray):
     a threshold for the signal related eigenvalues
     """
     median = np.median(eigvals)
-    eigvals *= (1 / median)
-    eigvals_t = []
-    # first condition
-    for i in range(len(eigvals)):
-        if np.sqrt(eigvals[i]) < 2:
-            eigvals_t.append(eigvals[i] * abs(median))
-    eigvals_t = np.array(eigvals_t)
-
-    # second conditions
-    PC_list = []
-    beta = 1.29
-    median_t = np.median(eigvals_t)
-    # print(median_t)
-    # get principal components
-    for i in range(len(eigvals_t)):
-        if eigvals_t[i] >= median_t * beta ** 2:
-            PC_list.append(eigvals_t[i])
-
-    if len(PC_list) > 0:
-        # k_med = PC_list.index(max(PC_list))
-        k_med = np.where(eigvals == max(PC_list))[0]
-    else:
-        k_med = [eigvals.shape[0] - 1]
-
-    return k_med[0]
+    eigvals_t = eigvals[eigvals < 2 * median]
+    beta2 = 1.29 ** 2
+    k_med = eigvals[eigvals > beta2 * np.median(eigvals_t)].shape[0]
+    return k_med
