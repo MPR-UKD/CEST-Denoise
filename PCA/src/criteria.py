@@ -58,11 +58,12 @@ def median_criteria(eigvals: np.ndarray):
     a threshold for the signal related eigenvalues
     """
     median = np.median(eigvals)
+    eigvals *= (1 / median)
     eigvals_t = []
     # first condition
     for i in range(len(eigvals)):
-        if np.sqrt(eigvals[i]) < 2 * np.sqrt(median):
-            eigvals_t.append(eigvals[i])
+        if np.sqrt(eigvals[i]) < 2:
+            eigvals_t.append(eigvals[i] * abs(median))
     eigvals_t = np.array(eigvals_t)
 
     # second conditions
@@ -79,8 +80,6 @@ def median_criteria(eigvals: np.ndarray):
         # k_med = PC_list.index(max(PC_list))
         k_med = np.where(eigvals == max(PC_list))[0]
     else:
-        k_med = [eigvals.shape[0] -1 ]
+        k_med = [eigvals.shape[0] - 1]
 
     return k_med[0]
-
-

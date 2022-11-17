@@ -3,7 +3,7 @@ from .utils import *
 from .criteria import *
 
 
-def pca(img: np.ndarray, mask: np.ndarray, criteria: str) -> np.ndarray:
+def pca(img: np.ndarray, criteria: str, mask: np.ndarray | None = None) -> np.ndarray:
     """
     :param img: noisy 2D CEST image (x,y,ndyn)
     :param mask: 2D binary mask (x,y)
@@ -30,7 +30,7 @@ def step1(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
 
 def step2(C_tilde):
     """Step 2: Principal component analyses"""
-    cov_C_tilde = np.cov(C_tilde)
+    cov_C_tilde = cov(C_tilde)
     eigvals, eigvecs = calc_eig(cov_C_tilde, 'max')
     return eigvals, eigvecs
 
