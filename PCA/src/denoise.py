@@ -11,6 +11,8 @@ def pca(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
 
     """ Step 1: Create column-wise mean-centered casorati_matrix C_tilde """
     C_tilde = step1(img, mask)
+    """ Step 2: Principal component analysis - calc eigvals and eigvecs"""
+    eigvals, eigvecs = step2(C_tilde)
 
 
 def step1(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
@@ -21,3 +23,10 @@ def step1(img: np.ndarray, mask: np.ndarray) -> np.ndarray:
     Z_mean = casorati_matrix.mean(axis=0)
     casorati_matrix -= Z_mean
     return casorati_matrix
+
+
+def step2(C_tilde):
+    """Step 2: Principal component analyses"""
+    cov_C_tilde = np.cov(C_tilde)
+    eigvals, eigvecs = calc_eig(cov_C_tilde, 'max')
+    return eigvals, eigvecs

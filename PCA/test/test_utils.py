@@ -1,7 +1,7 @@
 import unittest
 
 import numpy as np
-from PCA.src.utils import img_to_casorati_matrix
+from PCA.src.utils import img_to_casorati_matrix, calc_eig
 
 
 class TestUtils(unittest.TestCase):
@@ -18,7 +18,12 @@ class TestUtils(unittest.TestCase):
         casorati = img_to_casorati_matrix(img, mask)
         self.assertEqual(mask.sum(), casorati.shape[0])
 
-
+    def test_order_eigval(self):
+        test_matrix = np.array([[0, 2], [2, 3]])
+        eigvals, eigvecs = calc_eig(test_matrix, 'max')
+        self.assertEqual(eigvals.max(), eigvals[0])
+        eigvals, eigvecs = calc_eig(test_matrix, 'min')
+        self.assertEqual(eigvals.min(), eigvals[0])
 
 if __name__ == '__main__':
     unittest.main()
