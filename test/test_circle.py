@@ -8,4 +8,4 @@ if __name__ == '__main__':
     loader = LoaderCEST(path=root)
 
     Z, mask, file = loader.__getitem__(0)
-    pca(Z, 'median')
+    pca(Z, 'malinowski')
