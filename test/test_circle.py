@@ -1,5 +1,9 @@
+import time
+
 from Loader.loader import LoaderCEST
-from PCA.src.denoise import pca
+from PCA import pca
+from NLM import nlm
+
 from pathlib import Path
 
 
@@ -8,4 +12,7 @@ if __name__ == '__main__':
     loader = LoaderCEST(path=root)
 
     Z, mask, file = loader.__getitem__(0)
-    pca(Z, 'malinowski')
+    #pca(Z, 'malinowski')
+    k = time.time()
+    nlm(Z[:, :, 0], 16, 8)
+    print(time.time() - k)

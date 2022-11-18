@@ -1,6 +1,7 @@
 import numpy as np
 from .utils import *
 from .criteria import *
+import itertools
 
 
 def pca(img: np.ndarray, criteria: str, mask: np.ndarray | None = None) -> np.ndarray:
@@ -21,6 +22,7 @@ def pca(img: np.ndarray, criteria: str, mask: np.ndarray | None = None) -> np.nd
     """Step 5: Reform back to image"""
     img = step5(C_tilde, img, mask)
     return img
+
 
 def step1(img: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     """
@@ -49,6 +51,7 @@ def step3(eigenvalues: np.ndarray, C_tilde: np.ndarray, criteria: str):
     raise ValueError(f'Criteria: {criteria} is not implemented! Currently are "malinowski", "nelson" and "median"'
                      f'criteria available')
 
+
 def step4(C_tilde, Z_mean, eigvecs, k):
     C = C_tilde.copy()
     for i in range(C_tilde.shape[0]):
@@ -59,12 +62,12 @@ def step4(C_tilde, Z_mean, eigvecs, k):
 
 
 def step5(C_tilde, img, mask):
-        n, m, _ = img.shape
-        if mask is None:
-            mask = np.ones((n, m))
-        count = 0
-        for i1, i2 in iter.product(range(n), range(m)):
-            if mask[i2, i1] == 0:
-                continue
-            img[i2, i1, :] = C_tilde[count, :]
-        return img
+    n, m, _ = img.shape
+    if mask is None:
+        mask = np.ones((n, m))
+    count = 0
+    for i1, i2 in itertools.product(range(n), range(m)):
+        if mask[i2, i1] == 0:
+            continue
+        img[i2, i1, :] = C_tilde[count, :]
+    return img
