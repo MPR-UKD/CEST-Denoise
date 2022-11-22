@@ -1,6 +1,25 @@
 import numpy as np
 from .step1 import step1_basic_estimation
 from .step2 import step2_final_estimation
+from multiprocessing import pool
+
+def bm3d_CEST(img: np.ndarray, config: dict | None = None, multi_processing: bool = False) -> np.ndarray:
+    img = (img * 255).astype('int16')
+    if not multi_processing:
+        for dyn in range(img.shape[-1]):
+            img[:, :, dyn] = bm3d(img, config)
+    else:
+
+        with pool.Pool(12) as p:
+            res = p.imap_unordered(run_ml, [(img[:, :, dyn], config, dyn) for dyn in range(img.shape[-1])])
+            for d_img, dyn in res:
+                img[:, :, dyn] = d_img
+    return img
+
+
+def run_ml(args):
+    img, config, dyn = args
+    return bm3d(img, config), dyn
 
 
 def bm3d(img: np.ndarray, config: dict | None = None) -> np.ndarray:
