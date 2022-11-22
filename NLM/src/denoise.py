@@ -2,6 +2,12 @@ import numpy as np
 from numba import jit
 
 
+def nlm_CEST(images, big_window_size, small_window_size, multi_processing: bool) -> np.ndarray:
+    if not multi_processing:
+        for dyn in images.shape[-1]:
+            images[:, :, dyn] = nlm(images[:, :, dyn], big_window_size, small_window_size)
+    return images
+
 @jit(nopython=True)
 def nlm(image, big_window_size, small_window_size):
     pad_width, search_width = big_window_size // 2, small_window_size // 2
