@@ -3,7 +3,7 @@ import time
 from Loader.loader import LoaderCEST
 from PCA import pca
 from NLM import nlm
-
+from BM3D import bm3d
 from pathlib import Path
 
 
@@ -12,7 +12,6 @@ if __name__ == '__main__':
     loader = LoaderCEST(path=root)
 
     Z, mask, file = loader.__getitem__(0)
-    #pca(Z, 'malinowski')
-    k = time.time()
-    nlm(Z[:, :, 0], 16, 8)
-    print(time.time() - k)
+
+    _ = bm3d((Z[:64, :64, 0] * 255).astype('int16'))
+    b = 2
