@@ -8,34 +8,46 @@ def bm3d(img: np.ndarray, config: dict | None = None) -> np.ndarray:
 
     if config is None:
         config = dict()
+
     sigma = config.get('sigma', 25.0)  # variance of the noise
     lamb2d = config.get('lamb2d', 2.0)
     lamb3d = config.get('lamb3d', 2.7)
-    Step1_ThreDist = config.get('Step1_ThreDist', 2500)  # threshold distance
-    Step1_MaxMatch = config.get('Step1_MaxMatch', 16)  # max matched blocks
-    Step1_BlockSize = config.get('Step1_BlockSize', 8)
-    Step1_WindowSize = config.get('Step1_WindowSize', 39)  # search window size
-    Step2_ThreDist = config.get('Step2_ThreDist', 400)
-    Step2_MaxMatch = config.get('Step2_MaxMatch', 32)
-    Step2_BlockSize = config.get('Step2_BlockSize', 8)
-    Step2_WindowSize = config.get('Step2_WindowSize', 39)
-    Kaiser_Window_beta = config.get('Kaiser_Window_beta', 2.0)
+    KaiserWindowBeta = config.get('KaiserWindowBeta', 2.0)
+    transformation_function = config.get('TransformationFunction', 'cos')
+
+    assert transformation_function in ['cos', 'sin'], f'The transformation function {transformation_function} is ' \
+                                                      f'not supported. Currently the following discrete ' \
+                                                      f'transformation functions are supported: [cos, sin]'
+
+    # Step 1 - basic estimate
+    step1_threshold_distance = config.get('step1_threshold_distance', 2500)  # threshold distance
+    step1_max_match = config.get('step1_max_match', 16)  # max matched blocks
+    step1_BlockSize = config.get('step1_BlockSize', 8)  # BlockSize Step 1
+    step1_WindowSize = config.get('step1_WindowSize', 39)  # search window size
+
+    # Step 2 - final estimate
+    step2_threshold_distance = config.get('step2_threshold_distance', 400)  # threshold distance
+    step2_max_match = config.get('step2_max_match', 32)  # max matched blocks
+    step2_BlockSize = config.get('step2_BlockSize', 8)  # BlockSize Step 2
+    step2_WindowSize = config.get('step2_WindowSize', 39)  # search window size
 
     # ===============================================================================================
 
     # ============================================ BM3D =============================================
-    param_step1 = tuple([Step1_BlockSize, Step1_ThreDist, Step1_MaxMatch, Step1_WindowSize,
-                         lamb2d, lamb3d, sigma, Kaiser_Window_beta, 'cos'])
+    param_step1 = tuple([step1_BlockSize, step1_threshold_distance, step1_max_match, step1_WindowSize,
+                         lamb2d, lamb3d, sigma, KaiserWindowBeta, transformation_function])
 
-    param_step2 = tuple([Step2_BlockSize, Step2_ThreDist, Step2_MaxMatch, Step2_WindowSize,
-                         sigma, Kaiser_Window_beta, 'cos'])
+    param_step2 = tuple([step2_BlockSize, step2_threshold_distance, step2_max_match, step2_WindowSize,
+                         sigma, KaiserWindowBeta, transformation_function])
 
     # ==================================================================================================
     #                                         Basic estimate
     # ==================================================================================================
     basic_img = step1_basic_estimation(img, param_step1)
+
     # ==================================================================================================
     #                                         Final estimate
     # ==================================================================================================
     final_img = step2_final_estimation(basic_img, img, param_step2)
+
     return final_img
