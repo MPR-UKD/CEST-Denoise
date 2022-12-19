@@ -4,7 +4,9 @@ from .criteria import *
 import itertools
 
 
-def pca(img: np.ndarray, criteria: str, mask: np.ndarray | None = None) -> np.ndarray:
+def pca(img: np.ndarray,
+        criteria: str | int,
+        mask: np.ndarray | None = None) -> np.ndarray:
     """
     :param img: noisy 2D CEST image (x,y,ndyn)
     :param mask: 2D binary mask (x,y)
@@ -16,7 +18,11 @@ def pca(img: np.ndarray, criteria: str, mask: np.ndarray | None = None) -> np.nd
     """ Step 2: Principal component analysis - calc eigvals and eigvecs"""
     eigvals, eigvecs = step2(C_tilde)
     """ Step 3: Determine optimal number of components k """
-    k = step3(eigvals, C_tilde, criteria)
+    if type(criteria) == str:
+        k = step3(eigvals, C_tilde, criteria)
+    else:
+        k = criteria
+    print(k)
     """Step 4: Projection onto remaining components"""
     C_tilde = step4(C_tilde, Z_mean, eigvecs, k)
     """Step 5: Reform back to image"""
@@ -70,4 +76,5 @@ def step5(C_tilde, img, mask):
         if mask[i2, i1] == 0:
             continue
         img[i2, i1, :] = C_tilde[count, :]
+        count += 1
     return img

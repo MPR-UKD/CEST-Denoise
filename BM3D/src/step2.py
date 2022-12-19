@@ -7,6 +7,7 @@ import itertools
 def step2_final_estimation(basic_estimate_img: np.ndarray,
                            noisy_image: np.ndarray,
                            param: tuple,
+                           mask: np.ndarray,
                            verbose: bool = False):
     """
     Give the final estimate after grouping, Wiener filtering and aggregation
@@ -39,6 +40,8 @@ def step2_final_estimation(basic_estimate_img: np.ndarray,
             range(int((basic_estimate_img.shape[1] - BlockSize)))):
 
         ref_block_position = (x, y)
+        if mask[x,y] == 0:
+            continue
 
         # Grouping: Find similar blocks to current reference block in the estimated image.
         # Hint: Same block groups for basic_estimate_image and noisy_image

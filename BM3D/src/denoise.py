@@ -3,7 +3,10 @@ from .step1 import step1_basic_estimation
 from .step2 import step2_final_estimation
 from multiprocessing import pool
 
-def bm3d_CEST(img: np.ndarray, config: dict | None = None, multi_processing: bool = False) -> np.ndarray:
+def bm3d_CEST(img: np.ndarray,
+              mask: np.ndarray | None = None,
+              config: dict | None = None,
+              multi_processing: bool = False) -> np.ndarray:
     img = (img * 255).astype('int16')
     if not multi_processing:
         for dyn in range(img.shape[-1]):
@@ -11,18 +14,20 @@ def bm3d_CEST(img: np.ndarray, config: dict | None = None, multi_processing: boo
     else:
 
         with pool.Pool(12) as p:
-            res = p.imap_unordered(run_ml, [(img[:, :, dyn], config, dyn) for dyn in range(img.shape[-1])])
+            res = p.imap_unordered(run_ml, [(img[:, :, dyn], mask, config, dyn) for dyn in range(img.shape[-1])])
             for d_img, dyn in res:
                 img[:, :, dyn] = d_img
     return img
 
 
 def run_ml(args):
-    img, config, dyn = args
-    return bm3d(img, config), dyn
+    img, mask, config, dyn = args
+    return bm3d(img, config, mask), dyn
 
 
-def bm3d(img: np.ndarray, config: dict | None = None) -> np.ndarray:
+def bm3d(img: np.ndarray,
+         config: dict | None = None,
+         mask: np.ndarray | None = None) -> np.ndarray:
     assert 'int' in str(img.dtype), 'Only integer images currently supported'
 
     if config is None:
@@ -62,11 +67,11 @@ def bm3d(img: np.ndarray, config: dict | None = None) -> np.ndarray:
     # ==================================================================================================
     #                                         Basic estimate
     # ==================================================================================================
-    basic_img = step1_basic_estimation(img, param_step1)
+    basic_img = step1_basic_estimation(img, param_step1, mask)
 
     # ==================================================================================================
     #                                         Final estimate
     # ==================================================================================================
-    final_img = step2_final_estimation(basic_img, img, param_step2)
+    final_img = step2_final_estimation(basic_img, img, param_step2, mask)
 
     return final_img

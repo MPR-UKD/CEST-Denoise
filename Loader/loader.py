@@ -32,7 +32,6 @@ class LoaderCEST(Loader):
 
     def __getitem__(self, idx: int) -> tuple[np.ndarray, np.ndarray, Path]:
         file = self.files[idx]
-        mask_file = file.parent / 'mask.nii'
+        mask_file = file.parent / 'mask.nii.gz'
         return load_z_spectra(file), load_nii(mask_file), file
-
 

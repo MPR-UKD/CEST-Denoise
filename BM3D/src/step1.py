@@ -12,6 +12,7 @@ from .support_function import *
 
 def step1_basic_estimation(noisy_img: np.ndarray,
                            param: tuple,
+                           mask: np.ndarray,
                            verbose: bool = False):
     """
     Implementation of the first step of BM3D, which provides a base estimation of the image without noise
@@ -48,7 +49,8 @@ def step1_basic_estimation(noisy_img: np.ndarray,
             range(int((noisy_img.shape[1] - BlockSize)))):
 
         ref_block_position = (x, y)
-
+        if mask[x,y] == 0:
+            continue
         # Grouping: Find similar blocks to current reference block in the noisy \ orginal image, with Hard-Thresholding
         if verbose and x == 0 and y == 0:
             print(f"Search similar blocks with threshold distance = {ThresholdDistance}")
