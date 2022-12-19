@@ -83,7 +83,6 @@ def find_search_window(
     return window_location
 
 
-@jit(nopython=True)
 def discrete_2D_transformation(
     image: np.ndarray, BlockSize: int, mode: str
 ) -> np.ndarray:
@@ -112,12 +111,13 @@ def discrete_2D_transformation(
                 discrete_blocks[x, y, :, :] = dct2D(block.astype(np.float64))
             elif mode == "sin":
                 discrete_blocks[x, y, :, :] = dst2D(block.astype(np.float64))
+            else:
+                raise ValueError
 
     # Return the transformed blocks
     return discrete_blocks
 
 
-@jit(nopython=True)
 def dct2D(array: np.ndarray) -> np.ndarray:
     """
     2D discrete cosine transform (DCT)
@@ -125,7 +125,6 @@ def dct2D(array: np.ndarray) -> np.ndarray:
     return dct(dct(array, axis=0, norm="ortho"), axis=1, norm="ortho")
 
 
-@jit(nopython=True)
 def idct2D(array: np.ndarray) -> np.ndarray:
     """
     inverse 2D discrete cosine transform
@@ -133,7 +132,6 @@ def idct2D(array: np.ndarray) -> np.ndarray:
     return idct(idct(array, axis=0, norm="ortho"), axis=1, norm="ortho")
 
 
-@jit(nopython=True)
 def dst2D(array: np.ndarray) -> np.ndarray:
     """
     2D discrete sinus transform (DCT)
@@ -141,7 +139,6 @@ def dst2D(array: np.ndarray) -> np.ndarray:
     return dst(dst(array, axis=0, norm="ortho"), axis=1, norm="ortho")
 
 
-@jit(nopython=True)
 def idst2D(array: np.ndarray) -> np.ndarray:
     """
     inverse 2D discrete sinus transform
