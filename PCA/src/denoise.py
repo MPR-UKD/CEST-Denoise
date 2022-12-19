@@ -4,9 +4,9 @@ from .criteria import *
 import itertools
 
 
-def pca(img: np.ndarray,
-        criteria: str | int,
-        mask: np.ndarray | None = None) -> np.ndarray:
+def pca(
+    img: np.ndarray, criteria: str | int, mask: np.ndarray | None = None
+) -> np.ndarray:
     """
     :param img: noisy 2D CEST image (x,y,ndyn)
     :param mask: 2D binary mask (x,y)
@@ -43,27 +43,41 @@ def step1(img: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
 def step2(C_tilde):
     """Step 2: Principal component analyses"""
     cov_C_tilde = cov(C_tilde)
-    eigvals, eigvecs = calc_eig(cov_C_tilde, 'max')
+    eigvals, eigvecs = calc_eig(cov_C_tilde, "max")
     return eigvals, eigvecs
 
 
 def step3(eigenvalues: np.ndarray, C_tilde: np.ndarray, criteria: str):
-    if criteria == 'malinowski':
+    if criteria == "malinowski":
         return malinowski_criteria(eigenvalues, C_tilde.shape)
-    if criteria == 'nelson':
+    if criteria == "nelson":
         return nelson_criteria(eigenvalues, C_tilde.shape)
-    if criteria == 'median':
+    if criteria == "median":
         return median_criteria(eigenvalues)
-    raise ValueError(f'Criteria: {criteria} is not implemented! Currently are "malinowski", "nelson" and "median"'
-                     f'criteria available')
+    raise ValueError(
+        f'Criteria: {criteria} is not implemented! Currently are "malinowski", "nelson" and "median"'
+        f"criteria available"
+    )
 
 
 def step4(C_tilde, Z_mean, eigvecs, k):
     C = C_tilde.copy()
     for i in range(C_tilde.shape[0]):
-        C_tilde[i] = np.array([np.dot(C_tilde[i], np.dot(np.transpose(np.expand_dims(eigvecs[:, ii], axis=0)),
-                                                         np.expand_dims(eigvecs[:, ii], axis=0))) for ii in range(k)]
-                              ).sum(axis=0) + Z_mean
+        C_tilde[i] = (
+            np.array(
+                [
+                    np.dot(
+                        C_tilde[i],
+                        np.dot(
+                            np.transpose(np.expand_dims(eigvecs[:, ii], axis=0)),
+                            np.expand_dims(eigvecs[:, ii], axis=0),
+                        ),
+                    )
+                    for ii in range(k)
+                ]
+            ).sum(axis=0)
+            + Z_mean
+        )
     return C_tilde
 
 

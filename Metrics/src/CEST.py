@@ -17,7 +17,9 @@ def mtr_asym_curve(Z: np.ndarray) -> np.ndarray:
     return Z[:, :, idx1] - Z[:, :, idx2]
 
 
-def mtr_asym(Z: np.ndarray, mask: np.ndarray, mtr_asym_ppm: tuple, ppm: float) -> tuple[np.ndarray, np.ndarray]:
+def mtr_asym(
+    Z: np.ndarray, mask: np.ndarray, mtr_asym_ppm: tuple, ppm: float
+) -> tuple[np.ndarray, np.ndarray]:
     """
     Calculate MTR asymmetry and MTR asymmetry image.
 
@@ -39,6 +41,8 @@ def mtr_asym(Z: np.ndarray, mask: np.ndarray, mtr_asym_ppm: tuple, ppm: float) -
         idx1, idx2 = idx2, idx1
 
     mtr_asym = mtr_asym_curve(Z)
-    mtr_asym_img = np.sum(mtr_asym[:, :, idx1: idx2 + 1], axis=2) / (idx2 + 1 - idx1) * 100
+    mtr_asym_img = (
+        np.sum(mtr_asym[:, :, idx1 : idx2 + 1], axis=2) / (idx2 + 1 - idx1) * 100
+    )
     mtr_asym_img[mask == 0] = np.nan
     return mtr_asym, mtr_asym_img

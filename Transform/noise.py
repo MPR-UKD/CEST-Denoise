@@ -3,7 +3,6 @@ from numpy.fft import fftshift, ifftshift, fftn, ifftn
 
 
 class Noiser:
-
     def __init__(self, sigma: float = 0.01):
         self.sigma = sigma
 
@@ -35,32 +34,36 @@ class Noiser:
         shape = img.shape
         return img + np.random.normal(mean, sigma, shape)
 
-    def __transform_kspace_to_image(self,
-                                    k: np.ndarray,
-                                    dim: np.ndarray | None = None,
-                                    img_shape: tuple | None = None) -> np.ndarray:
-        """ Computes the Fourier transform from k-space to image space
-            along a given or all dimensions
-            :param k: k-space data
-            :param dim: vector of dimensions to transform
-            :param img_shape: desired shape of output image
-            :returns: data in image space (along transformed dimensions)
-            """
+    def __transform_kspace_to_image(
+        self,
+        k: np.ndarray,
+        dim: np.ndarray | None = None,
+        img_shape: tuple | None = None,
+    ) -> np.ndarray:
+        """Computes the Fourier transform from k-space to image space
+        along a given or all dimensions
+        :param k: k-space data
+        :param dim: vector of dimensions to transform
+        :param img_shape: desired shape of output image
+        :returns: data in image space (along transformed dimensions)
+        """
         if not dim:
             dim = range(k.ndim)
         return ifftn(ifftshift(k), s=img_shape, axes=dim)
 
-    def __transform_image_to_kspace(self,
-                                    img: np.ndarray,
-                                    dim: np.ndarray | None = None,
-                                    k_shape: tuple | None = None) -> np.ndarray:
-        """ Computes the Fourier transform from image space to k-space space
-            along a given or all dimensions
-            :param img: image space data
-            :param dim: vector of dimensions to transform
-            :param k_shape: desired shape of output k-space data
-            :returns: data in k-space (along transformed dimensions)
-            """
+    def __transform_image_to_kspace(
+        self,
+        img: np.ndarray,
+        dim: np.ndarray | None = None,
+        k_shape: tuple | None = None,
+    ) -> np.ndarray:
+        """Computes the Fourier transform from image space to k-space space
+        along a given or all dimensions
+        :param img: image space data
+        :param dim: vector of dimensions to transform
+        :param k_shape: desired shape of output k-space data
+        :returns: data in k-space (along transformed dimensions)
+        """
         if not dim:
             dim = range(img.ndim)
         return fftshift(fftn(img, s=k_shape, axes=dim), axes=dim)

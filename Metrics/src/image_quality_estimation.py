@@ -12,10 +12,7 @@ class IQS(ABC):
         # The reference image to compare against
         self.ref_image = ref_image
 
-    def mse(self,
-            img1,
-            img2: np.ndarray = None,
-            mask: np.ndarray = None):
+    def mse(self, img1, img2: np.ndarray = None, mask: np.ndarray = None):
         # If img2 is not provided, use the reference image
         if img2 is None:
             img2 = self.ref_image
@@ -27,10 +24,7 @@ class IQS(ABC):
         mse = np.mean((img1 - img2) ** 2)
         return mse
 
-    def psnr(self,
-             img1: np.ndarray,
-             img2: np.ndarray = None,
-             mask: np.ndarray = None):
+    def psnr(self, img1: np.ndarray, img2: np.ndarray = None, mask: np.ndarray = None):
         # If img2 is not provided, use the reference image
         if img2 is None:
             img2 = self.ref_image
@@ -42,10 +36,9 @@ class IQS(ABC):
         # Calculate the PSNR using the MSE and PIXEL_MAX
         return 20 * math.log10(self.PIXEL_MAX / math.sqrt(mse))
 
-    def root_mean_square_error(self,
-                               img1: np.ndarray,
-                               img2: np.ndarray = None,
-                               mask=None):
+    def root_mean_square_error(
+        self, img1: np.ndarray, img2: np.ndarray = None, mask=None
+    ):
         # If img2 is not provided, use the reference image
         if img2 is None:
             img2 = self.ref_image

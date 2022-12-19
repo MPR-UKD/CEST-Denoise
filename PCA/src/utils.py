@@ -23,13 +23,13 @@ def cov(C_tilde):
     cov = 1 / (C_tilde.shape[1] - 1) * np.dot(np.transpose(C_tilde), C_tilde)
     return cov
 
+
 def calc_eig(matrix: np.array, order: str) -> tuple[np.ndarray, np.ndarray]:
     eigvals, eigvecs = np.linalg.eig(matrix)
-    if order == 'max':
+    if order == "max":
         idx = eigvals.argsort()[::-1]
-    if order == 'min':
+    if order == "min":
         idx = eigvals.argsort()
     eigvals = eigvals[idx]
     eigvecs = eigvecs[:, idx]
     return np.real(eigvals), np.real(eigvecs)
-

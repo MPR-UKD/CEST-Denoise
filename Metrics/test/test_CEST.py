@@ -35,7 +35,7 @@ class TestMtrAsym(unittest.TestCase):
         mask = np.array([[1, 1], [0, 1]])
         curve, mtr_asym_img = mtr_asym(Z, mask, (0, 1), 3)
         self.assertTrue(mtr_asym_img[mask != 0].sum() > 0)
-        self.assertEqual(str(mtr_asym_img[1,0]), 'nan')
+        self.assertEqual(str(mtr_asym_img[1, 0]), "nan")
 
         # Test MTR asymmetry image with a Lorentzian curve centered at negative ppm
         Z = generate_Z_3D(img_size=(2, 2), dyn=25, ppm=3, a=1, b=-1, c=3)

@@ -16,7 +16,7 @@ def lorentzian(a: float, b: float, c: float, x: np.ndarray) -> np.ndarray:
     Returns:
     - np.ndarray, representing the values of the Lorentzian function
     """
-    return a / (1 + ((x - b) / c)**2)
+    return a / (1 + ((x - b) / c) ** 2)
 
 
 def z_spectra(a: float, b: float, c: float, x: np.ndarray) -> np.ndarray:
@@ -35,7 +35,9 @@ def z_spectra(a: float, b: float, c: float, x: np.ndarray) -> np.ndarray:
     return 1 - lorentzian(a, b, c, x)
 
 
-def generate_Z_3D(img_size: tuple, dyn: int, ppm: float, a: float = 0.1, b: float = 1, c: float = 3) -> np.ndarray:
+def generate_Z_3D(
+    img_size: tuple, dyn: int, ppm: float, a: float = 0.1, b: float = 1, c: float = 3
+) -> np.ndarray:
     """
     Generate a 3D array of Z values.
 
@@ -53,7 +55,7 @@ def generate_Z_3D(img_size: tuple, dyn: int, ppm: float, a: float = 0.1, b: floa
     Z = np.zeros((img_size[0], img_size[1], dyn))
 
     step_size = (2 * ppm) / (dyn - 1)
-    x = np.arange(- ppm, ppm + 0.001, step_size)
+    x = np.arange(-ppm, ppm + 0.001, step_size)
 
     # Calculate Lorentzian curve
     z = z_spectra(a, b, c, x)
@@ -61,4 +63,3 @@ def generate_Z_3D(img_size: tuple, dyn: int, ppm: float, a: float = 0.1, b: floa
     for x, y in itertools.product(range(img_size[0]), range(img_size[1])):
         Z[x, y, :] = z
     return Z
-

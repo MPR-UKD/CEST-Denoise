@@ -11,7 +11,6 @@ class TestIQS(unittest.TestCase):
         # Create an instance of the IQS class
         self.iqs = IQS(pixel_max=255, ref_image=self.ref_image)
 
-
     def test_mse(self):
         # Create a test image with the same shape as the reference image
         test_image = np.zeros((10, 10))
@@ -46,5 +45,5 @@ class TestIQS(unittest.TestCase):
         self.assertRaises(ValueError, self.iqs.root_mean_square_error, test_image)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

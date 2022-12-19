@@ -11,11 +11,11 @@ class TestLoader(unittest.TestCase):
         # Create a temporary directory for the test data
         self.temp_dir = tempfile.TemporaryDirectory()
         # Create a dummy image file for testing
-        self.image_file = Path(self.temp_dir.name) / 'image.nii'
+        self.image_file = Path(self.temp_dir.name) / "image.nii"
         img = np.zeros((10, 10, 10))
         nib.save(nib.Nifti1Image(img, np.eye(4)), self.image_file)
         # Create a dummy mask file for testing
-        self.mask_file = Path(self.temp_dir.name) / 'mask.nii.gz'
+        self.mask_file = Path(self.temp_dir.name) / "mask.nii.gz"
         img = np.ones((10, 10, 10))
         nib.save(nib.Nifti1Image(img, np.eye(4)), self.mask_file)
         # Create a dummy LoaderCEST instance for testing
@@ -37,5 +37,5 @@ class TestLoader(unittest.TestCase):
         self.assertEqual(file, self.image_file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

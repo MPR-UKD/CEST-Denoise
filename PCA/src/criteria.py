@@ -1,6 +1,7 @@
 import numpy as np
 from matplotlib import pyplot as plt
 
+
 def malinowski_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
     """Based on a theory of error concerning abstact factor analysis"""
     RE = []
@@ -11,9 +12,13 @@ def malinowski_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
         eigvals_sum = np.sum(eigvals[l::])
         eigvals_liste.append((eigvals_sum))
         if C_tilde_shape[0] > C_tilde_shape[1]:
-            RE.append((abs(eigvals_sum) / (C_tilde_shape[0] * (C_tilde_shape[1] - k))) ** 0.5)
+            RE.append(
+                (abs(eigvals_sum) / (C_tilde_shape[0] * (C_tilde_shape[1] - k))) ** 0.5
+            )
         elif C_tilde_shape[0] < C_tilde_shape[1]:
-            RE.append(abs((eigvals_sum / (C_tilde_shape[1] * (C_tilde_shape[0] - k)))) ** 0.5)
+            RE.append(
+                abs((eigvals_sum / (C_tilde_shape[1] * (C_tilde_shape[0] - k)))) ** 0.5
+            )
 
     k_ind = []
     for k in range(len(RE)):
@@ -35,8 +40,9 @@ def nelson_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
         l_sum = np.sum(l_ist[l::])
         l_squared = np.sum(l_ist[l::] ** 2)
         numerator = (C_tilde_shape[1] - k) * eigvals_sum_l - l_sum * eigvals_sum
-        denominator = np.sqrt(((C_tilde_shape[1] - k) * l_squared - l_sum ** 2)) * np.sqrt(
-            ((C_tilde_shape[1] - k) * eigvals_sum_squared - eigvals_sum ** 2))
+        denominator = np.sqrt(
+            ((C_tilde_shape[1] - k) * l_squared - l_sum**2)
+        ) * np.sqrt(((C_tilde_shape[1] - k) * eigvals_sum_squared - eigvals_sum**2))
         if denominator != 0:
             r_squared = (numerator / denominator) ** 2
             r2_list.append(r_squared)
@@ -50,7 +56,6 @@ def nelson_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
     return len(r2_list)
 
 
-
 def median_criteria(eigvals: np.ndarray):
     """
     Approach uses the median of the eigencalues to estimate the noise lvel of the data and thereby determines
@@ -58,6 +63,6 @@ def median_criteria(eigvals: np.ndarray):
     """
     median = np.median(eigvals)
     eigvals_t = eigvals[eigvals < 2 * median]
-    beta2 = 1.29 ** 2
+    beta2 = 1.29**2
     k_med = eigvals[eigvals > beta2 * np.median(eigvals_t)].shape[0]
     return k_med
