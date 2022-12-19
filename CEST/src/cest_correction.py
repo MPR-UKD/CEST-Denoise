@@ -1,6 +1,5 @@
 import numpy as np
-from CEST import matlab_style_functions
-from multiprocessing import Pool
+from CEST.src.CEST import matlab_style_functions
 
 
 def cest_correction(cest_array: np.ndarray,

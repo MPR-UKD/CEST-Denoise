@@ -1,8 +1,7 @@
 import numpy as np
 
-from CEST.cest_correction import cest_correction
-from CEST.WASSR import WASSR
-import scipy.io as sio
+from CEST.src.cest_correction import cest_correction
+from CEST.src.WASSR import WASSR
 
 
 class CEST:

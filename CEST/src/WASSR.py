@@ -1,6 +1,5 @@
 import numpy as np
-import os
-from CEST import matlab_style_functions
+from CEST.src.CEST import matlab_style_functions
 
 
 class WASSR:
