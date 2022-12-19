@@ -1,9 +1,9 @@
 import itertools
 
-import numpy as np
 import matplotlib.pyplot as plt
-from .support_function import *
 
+from .support_function import *
+from typing import Tuple
 
 # ==================================================================================================
 #                                         Basic estimate
@@ -178,56 +178,75 @@ def grouping(
         )
 
 
-def filtering_3d(block_group: np.ndarray, threshold: float, mode: str):
-    # Do collaborative hard-thresholding which includes 3D transform, noise attenuation through
-    # hard-thresholding and inverse 3D transform
-    count = 0
+def filtering_3d(
+    block_group: np.ndarray, threshold: float, mode: str
+) -> Tuple[np.ndarray, int]:
+    """
+    Perform collaborative hard-thresholding on the block group, which includes 3D transform,
+    noise attenuation through hard-thresholding, and inverse 3D transform.
+    """
+    count = 0  # Counter for the number of non-zero elements in the transformed blocks
 
+    # Loop over the x and y positions in the block group
     for x, y in itertools.product(
         range(block_group.shape[1]), range(block_group.shape[2])
     ):
+        # Apply the discrete transform to the current block
         if mode == "cos":
             temp = dct(block_group[:, x, y], norm="ortho")
         elif mode == "sin":
             temp = dst(block_group[:, x, y], norm="ortho")
         else:
+            # If the mode is not "cos" or "sin", raise an error
             raise NotImplementedError
 
+        # Apply hard-thresholding to the transformed block
         temp[abs(temp[:]) < threshold] = 0.0
 
+        # Update the non-zero element count
         count += np.nonzero(temp)[0].size
+        # Apply the inverse transform to the thresholded block
         if mode == "cos":
             block_group[:, x, y] = list(idct(temp, norm="ortho"))
         elif mode == "sin":
             block_group[:, x, y] = list(idst(temp, norm="ortho"))
         else:
+            # If the mode is not "cos" or "sin", raise an error
             raise NotImplementedError
 
+    # Return the filtered block group and the non-zero element count
     return block_group, count
 
 
 def aggregation(
-    block_group: np.ndarray,
-    block_positions: np.ndarray,
-    basic_estimate_img: np.ndarray,
-    basic_weight: np.ndarray,
-    basicKaiser: np.ndarray,
-    nonzero_cnt: int,
-    sigma: float,
-    mode: str,
+    block_group: np.ndarray,  # 4D array of transformed blocks
+    block_positions: np.ndarray,  # 2D array of block positions in the image
+    basic_estimate_img: np.ndarray,  # 2D array to store the basic estimate image
+    basic_weight: np.ndarray,  # 2D array to store the weights for each pixel in the basic estimate image
+    basicKaiser: np.ndarray,  # 2D array of Kaiser window weights
+    nonzero_cnt: int,  # Number of non-zero blocks in the block group
+    sigma: float,  # Standard deviation of the noise
+    mode: str,  # Mode for the discrete transform, either "cos" or "sin"
 ):
+    # If there are no non-zero blocks, use the full block weight
     if nonzero_cnt < 1:
         block_weight = 1.0 * basicKaiser
+    # Otherwise, scale the block weight by 1/(sigma^2 * nonzero_cnt)
     else:
         block_weight = (1.0 / (sigma**2 * nonzero_cnt)) * basicKaiser
 
+    # Loop over the blocks in the block group
     for i in range(block_positions.shape[0]):
+        # Apply the inverse discrete transform to the current block
         if mode == "cos":
             estimation = block_weight * idct2D(block_group[i, :, :])
         elif mode == "sin":
             estimation = block_weight * idst2D(block_group[i, :, :])
         else:
+            # If the mode is not "cos" or "sin", raise an error
             raise NotImplementedError
+
+        # Add the estimation to the basic estimate image and update the weights
         basic_estimate_img[
             block_positions[i, 0] : block_positions[i, 0] + block_group.shape[1],
             block_positions[i, 1] : block_positions[i, 1] + block_group.shape[2],
