@@ -1,9 +1,9 @@
 import time
 
-from Loader.loader import LoaderCEST
+from Loader.src.loader import LoaderCEST
 from PCA import pca
-from NLM import nlm, nlm_CEST
-from BM3D import bm3d, bm3d_CEST
+from NLM import nlm_CEST
+from BM3D import bm3d_CEST
 from pathlib import Path
 
 

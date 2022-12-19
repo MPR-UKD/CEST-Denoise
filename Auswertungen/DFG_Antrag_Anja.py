@@ -7,9 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from CEST import CEST
-from Loader.dcm_transformer import dcm_to_nii
-from Loader.loader import LoaderCEST, load_nii
-from NLM import nlm_CEST
+from Loader.src.dcm_transformer import dcm_to_nii
+from Loader.src.loader import LoaderCEST, load_nii
 from PCA import pca
 
 

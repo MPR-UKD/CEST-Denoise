@@ -3,7 +3,7 @@ import numpy as np
 from abc import ABC, abstractmethod
 from pathlib import Path
 
-from Loader.utils import load_nii, load_z_spectra, get_files
+from Loader.src.utils import load_nii, load_z_spectra, get_files
 
 
 class Loader(ABC):

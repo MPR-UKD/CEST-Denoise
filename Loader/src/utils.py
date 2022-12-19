@@ -16,9 +16,9 @@ def load_nii(file: Path) -> np.ndarray:
     Returns:
         np.ndarray: The data from the NIfTI file.
     """
-    # Open the file and get the data
-    with nib.openfile(file) as f:
-        data = f.get_fdata()
+    img = nib.load(file)
+    # Get a copy of the data
+    data = img.get_fdata()
     # Return the data
     return data
 
@@ -64,7 +64,7 @@ def get_files(root: Path, pattern: str = None) -> list[Path]:
         # Loop through all the files in the current directory
         for file in files:
             # If a pattern is provided, skip the file if it doesn't match the pattern
-            if pattern not in file:
+            if pattern and pattern not in file:
                 continue
             # Add the file path to the list
             images.append(Path(parent) / file)
