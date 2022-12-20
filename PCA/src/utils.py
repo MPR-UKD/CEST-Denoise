@@ -55,4 +55,3 @@ def calc_eig(matrix: np.array, order: str) -> tuple[np.ndarray, np.ndarray]:
 
     # Return the real parts of the sorted eigenvalues and eigenvectors
     return np.real(eigvals), np.real(eigvecs)
-

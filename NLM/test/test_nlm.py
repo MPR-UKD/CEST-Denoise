@@ -28,11 +28,13 @@ def test_pad_image():
 
 def test_get_comparison_neighborhood():
     padded_image = np.array(
-        [[0, 1, 2, 3, 4],
-         [5, 6, 7, 8, 9],
-         [9, 10, 11, 12, 13],
-         [14, 15, 16, 17, 18],
-         [19, 20, 21, 22, 23]]
+        [
+            [0, 1, 2, 3, 4],
+            [5, 6, 7, 8, 9],
+            [9, 10, 11, 12, 13],
+            [14, 15, 16, 17, 18],
+            [19, 20, 21, 22, 23],
+        ]
     )
     comparison_neighborhood = get_comparison_neighborhood(padded_image, 1, 1, 1)
     expected_comparison_neighborhood = np.array([[0, 1, 2], [5, 6, 7], [9, 10, 11]])
@@ -63,8 +65,9 @@ def test_nlm_CEST():
 
     assert Z.shape == Z_denoise.shape
     assert iqs.psnr(Z_denoise[:, :, 0], Z[:, :, 0]) > iqs.psnr(
-        Z_denoise[:, :, 0], Z_noisy[:, :, 0]
+        Z_noisy[:, :, 0], Z[:, :, 0]
     )
+
 
 def test_nlm_CEST_ml():
     iqs = IQS(pixel_max=1)
@@ -75,7 +78,7 @@ def test_nlm_CEST_ml():
 
     assert Z.shape == Z_denoise.shape
     assert iqs.psnr(Z_denoise[:, :, 0], Z[:, :, 0]) > iqs.psnr(
-        Z_denoise[:, :, 0], Z_noisy[:, :, 0]
+        Z_noisy[:, :, 0], Z[:, :, 0]
     )
 
 

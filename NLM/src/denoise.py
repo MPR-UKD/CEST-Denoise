@@ -4,7 +4,11 @@ from multiprocessing import pool
 
 
 def nlm_CEST(
-    images, big_window_size, small_window_size, multi_processing: bool = False, pools: int = 5
+    images,
+    big_window_size,
+    small_window_size,
+    multi_processing: bool = False,
+    pools: int = 5,
 ) -> np.ndarray:
     images = (images * 255).astype("int16")
     if not multi_processing:
@@ -14,14 +18,21 @@ def nlm_CEST(
             )
     else:
         with pool.Pool(pools) as p:
-            res = [_ for _ in p.imap_unordered(
-                run_ml,
-                [(images[:, :, dyn], big_window_size, small_window_size, dyn) for dyn in range(images.shape[-1])],
-            )]
+            res = [
+                _
+                for _ in p.imap_unordered(
+                    run_ml,
+                    [
+                        (images[:, :, dyn], big_window_size, small_window_size, dyn)
+                        for dyn in range(images.shape[-1])
+                    ],
+                )
+            ]
         for d_img, dyn in res:
             images[:, :, dyn] = d_img
 
     return images / 255
+
 
 def run_ml(args):
     img, big_window_size, small_window_size, dyn = args

@@ -37,7 +37,13 @@ def z_spectra(a: float, b: float, c: float, x: np.ndarray) -> np.ndarray:
 
 
 def generate_Z_3D(
-    img_size: tuple, dyn: int, ppm: float, a: float = 0.1, b: float = 1, c: float = 3, delta: float = 0
+    img_size: tuple,
+    dyn: int,
+    ppm: float,
+    a: float = 0.1,
+    b: float = 1,
+    c: float = 3,
+    delta: float = 0,
 ) -> np.ndarray:
     """
     Generate a 3D array of Z values.

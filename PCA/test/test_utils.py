@@ -23,17 +23,16 @@ def test_calc_eig():
     # Call the function with the sample matrix and the "max" order
     eigvals, eigvecs = calc_eig(matrix, "max")
 
-    expected_eigvals = np.array([(33 ** (1/2) + 5) / 2, (-33 ** (1/2) + 5) / 2])
+    expected_eigvals = np.array([(33 ** (1 / 2) + 5) / 2, (-(33 ** (1 / 2)) + 5) / 2])
     assert (eigvals == expected_eigvals).all()
 
     # Call the function with the sample matrix and the "min" order
     eigvals, eigvecs = calc_eig(matrix, "min")
 
     # Verify that the output is correct
-    expected_eigvals = np.array([(-33 ** (1/2) + 5) / 2, (33 ** (1/2) + 5) / 2])
+    expected_eigvals = np.array([(-(33 ** (1 / 2)) + 5) / 2, (33 ** (1 / 2) + 5) / 2])
     assert (eigvals == expected_eigvals).all()
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

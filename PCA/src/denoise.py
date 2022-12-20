@@ -2,6 +2,7 @@ import numpy as np
 from .utils import *
 from .criteria import *
 import itertools
+from typing import Tuple
 
 
 def pca(
@@ -30,7 +31,7 @@ def pca(
     return img
 
 
-def step1(img: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def step1(img: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """
     # Create casorati matrix and Subtract Z_mean to obtain column-wise mean-centered casorati_matrix C_tilde
     """
@@ -40,14 +41,14 @@ def step1(img: np.ndarray, mask: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     return casorati_matrix, Z_mean
 
 
-def step2(C_tilde):
+def step2(C_tilde: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
     """Step 2: Principal component analyses"""
     cov_C_tilde = cov(C_tilde)
     eigvals, eigvecs = calc_eig(cov_C_tilde, "max")
     return eigvals, eigvecs
 
 
-def step3(eigenvalues: np.ndarray, C_tilde: np.ndarray, criteria: str):
+def step3(eigenvalues: np.ndarray, C_tilde: np.ndarray, criteria: str) -> int:
     if criteria == "malinowski":
         return malinowski_criteria(eigenvalues, C_tilde.shape)
     if criteria == "nelson":
@@ -60,7 +61,7 @@ def step3(eigenvalues: np.ndarray, C_tilde: np.ndarray, criteria: str):
     )
 
 
-def step4(C_tilde, Z_mean, eigvecs, k):
+def step4(C_tilde, Z_mean, eigvecs, k) -> np.ndarray:
     C = C_tilde.copy()
     for i in range(C_tilde.shape[0]):
         C_tilde[i] = (
@@ -81,7 +82,7 @@ def step4(C_tilde, Z_mean, eigvecs, k):
     return C_tilde
 
 
-def step5(C_tilde, img, mask):
+def step5(C_tilde, img, mask) -> np.ndarray:
     n, m, _ = img.shape
     if mask is None:
         mask = np.ones((n, m))

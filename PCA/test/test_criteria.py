@@ -9,10 +9,12 @@ def gen_data(img_shape: tuple, dyn: int, sigma: float):
     # Initialize Noiser object with specified noise level
     n = Noiser(sigma=sigma)
     # Generate CEST data with different chemical shifts
-    Z = generate_Z_3D(img_shape, dyn, 3, a=0.5, b=1, c=0.5, delta=0.05) + \
-        generate_Z_3D(img_shape, dyn, 3, 1, 0, 0.5, delta=0.01)
-    Z2 = generate_Z_3D(img_shape, dyn, 3, a=0.8, b=1, c=0.5, delta=0.05) + \
-         generate_Z_3D(img_shape, dyn, 3, 1, 0, 0.5, delta=0.01)
+    Z = generate_Z_3D(img_shape, dyn, 3, a=0.5, b=1, c=0.5, delta=0.05) + generate_Z_3D(
+        img_shape, dyn, 3, 1, 0, 0.5, delta=0.01
+    )
+    Z2 = generate_Z_3D(
+        img_shape, dyn, 3, a=0.8, b=1, c=0.5, delta=0.05
+    ) + generate_Z_3D(img_shape, dyn, 3, 1, 0, 0.5, delta=0.01)
     Z[5:30, 5:22, :] = Z2[5:30, 5:22, :]
     # Add noise to the combined data
     Z_noise = n.add_noise(Z)

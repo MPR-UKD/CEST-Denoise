@@ -18,11 +18,11 @@ def malinowski_criteria(eigenvalues, C_tilde_shape):
     m, n = C_tilde_shape[0], C_tilde_shape[1]
     #
     eigenvalues = abs(eigenvalues)
-    #eigvals /= eigvals.min()
+    # eigvals /= eigvals.min()
     m = 1
     RE = np.zeros(n - 1)
     for k in range(n - 1):
-        RE[k] = np.sqrt(np.sum(eigenvalues[k + 1:]) / (m * (n - k)))
+        RE[k] = np.sqrt(np.sum(eigenvalues[k + 1 :]) / (m * (n - k)))
     k_opt = np.argmin(np.array([RE[k] / (m * (n - k) ** 2) for k in range(n - 1)]))
     return k_opt
 

@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 from Transform.src.noise import Noiser
 
+
 def test_noiser_init():
     # Test if the Noiser object is initialized with the correct sigma value
     noiser = Noiser(sigma=0.1)
@@ -45,6 +46,6 @@ def test_get_white_noise():
     assert noise.shape == (10, 10)
     assert np.abs(noise.std() - 0.5) < 1e-6
 
-if __name__ == '__main__':
-    pytest.main()
 
+if __name__ == "__main__":
+    pytest.main()
