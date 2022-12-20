@@ -5,19 +5,19 @@ import itertools
 
 
 def step2_final_estimation(
-    basic_estimate_img: np.ndarray,
-    noisy_image: np.ndarray,
-    param: tuple,
-    mask: np.ndarray,
-    verbose: bool = False,
-):
+    basic_estimate_img: np.ndarray,  # 2D array of the basic estimate image
+    noisy_image: np.ndarray,  # 2D array of the noisy image
+    param: tuple,  # Tuple of hyperparameters for BM3D
+    mask: np.ndarray,  # 2D array of the mask for the image
+    verbose: bool = False,  # Flag for verbosity
+) -> np.ndarray:
     """
     Give the final estimate after grouping, Wiener filtering and aggregation
     Return:
         final estimate finalImg
     """
 
-    # convert param to function variables
+    # Unpack the hyperparameters from the param tuple
     (
         BlockSize,
         ThresholdDistance,
@@ -28,12 +28,12 @@ def step2_final_estimation(
         mode,
     ) = param
 
-    # initialization of basic_estimate_img, weights (both np.zeros with same shape as noisy_image)
-    # and the kaiser_window
+    # Initialize the final image, weights, and kaiser window arrays
     final_img, weights, kaiser_window = initialization(
         basic_estimate_img, BlockSize, KaiserWindowBeta
     )
 
+    # Print the shapes of the final image and kaiser window arrays if verbose is True
     if verbose:
         print(f"Finale image shape: {final_img.shape}")
         print(f"Kaiser window shape: {kaiser_window.shape}")
