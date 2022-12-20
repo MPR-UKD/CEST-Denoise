@@ -24,11 +24,13 @@ config = {
 }
 mask = np.ones((42, 42))
 
+
 @pytest.mark.test_id(1)
 def test_shape():
     # Test 1 - check that the function returns an image of the correct shape
     final_img = bm3d(img, config, mask)
     assert final_img.shape == (42, 42)
+
 
 @pytest.mark.test_id(2)
 def test_noise_level():
@@ -36,12 +38,13 @@ def test_noise_level():
     noise_level = 25
     img_shape = (42, 42)
     np.random.seed(0)
-    noisy_image = (np.random.randint(0, 255, (42,42))).astype('int16')
+    noisy_image = (np.random.randint(0, 255, (42, 42))).astype("int16")
 
     # Denoise the image
     denoised_image = bm3d(noisy_image, config={"sigma": noise_level})
 
     assert np.std(denoised_image) < np.std(noisy_image)
+
 
 @pytest.mark.test_id(3)
 def test_block_size():
@@ -53,6 +56,7 @@ def test_block_size():
     config = {"sigma": 25.0, "step1_BlockSize": 16, "step2_BlockSize": 16}
     result = bm3d(img, config, mask)
     assert result.shape == (42, 42)
+
 
 @pytest.mark.test_id(4)
 def test_window_size():
@@ -66,6 +70,7 @@ def test_window_size():
     result = bm3d(img, config, mask)
     assert result.shape == (42, 42)
 
+
 @pytest.mark.test_id(5)
 def test_sigma():
     # Test 5 - check that the function handles different sigma values correctly
@@ -76,6 +81,7 @@ def test_sigma():
     config = {"sigma": 50.0}
     result = bm3d(img, config, mask)
     assert result.shape == (42, 42)
+
 
 @pytest.mark.test_id(6)
 def test_Kaiser_window():
@@ -88,6 +94,7 @@ def test_Kaiser_window():
     result = bm3d(img, config, mask)
     assert result.shape == (42, 42)
 
+
 @pytest.mark.test_id(7)
 def test_transformation_functions():
     # Test 7 - check that the function handles different transformation functions correctly
@@ -99,6 +106,7 @@ def test_transformation_functions():
     result = bm3d(img, config, mask)
     assert result.shape == (42, 42)
 
+
 @pytest.mark.test_id(8)
 def test_bm3d_CEST():
     iqs = IQS(pixel_max=1)
@@ -108,7 +116,10 @@ def test_bm3d_CEST():
     Z_denoise = bm3d_CEST(Z, np.ones((42, 42)))
 
     assert Z.shape == Z_denoise.shape
-    assert iqs.psnr(Z_denoise[:, :, 0], Z[:, :, 0]) > iqs.psnr(Z_denoise[:, :, 0], Z_noisy[:, :, 0])
+    assert iqs.psnr(Z_denoise[:, :, 0], Z[:, :, 0]) > iqs.psnr(
+        Z_denoise[:, :, 0], Z_noisy[:, :, 0]
+    )
+
 
 @pytest.mark.test_id(9)
 def test_bm3d_CEST_ml():
@@ -119,7 +130,10 @@ def test_bm3d_CEST_ml():
     Z_denoise = bm3d_CEST(Z, np.ones((42, 42)), multi_processing=True)
 
     assert Z.shape == Z_denoise.shape
-    assert iqs.psnr(Z_denoise[:, :, 0], Z[:, :, 0]) > iqs.psnr(Z_denoise[:, :, 0], Z_noisy[:, :, 0])
+    assert iqs.psnr(Z_denoise[:, :, 0], Z[:, :, 0]) > iqs.psnr(
+        Z_denoise[:, :, 0], Z_noisy[:, :, 0]
+    )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     pytest.main()
