@@ -161,17 +161,15 @@ def grouping(
                 distances[num_similar_blocks] = distance_block_to_reference
                 num_similar_blocks += 1
 
+    idx = np.argsort(distances)
     if num_similar_blocks <= max_number_of_similar_blocks:
         return (
-            block_positions[:num_similar_blocks, :],
-            block_groups[:num_similar_blocks, :, :],
+            block_positions[idx[:num_similar_blocks], :],
+            block_groups[idx[:num_similar_blocks], :, :],
         )
     else:
         # more than max_number_of_similar_blocks similar blocks founded, return max_number_of_similar_blocks of
         # most similar blocks
-        idx = np.argpartition(
-            distances[:num_similar_blocks], max_number_of_similar_blocks
-        )
         return (
             block_positions[idx[:max_number_of_similar_blocks], :],
             block_groups[idx[:max_number_of_similar_blocks], :],
