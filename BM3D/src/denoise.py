@@ -13,7 +13,7 @@ def bm3d_CEST(
     img = (img * 255).astype("int16")
     if not multi_processing:
         for dyn in range(img.shape[-1]):
-            img[:, :, dyn] = bm3d(img, config)
+            img[:, :, dyn] = bm3d(img[:, :, dyn], config, mask)
     else:
 
         with pool.Pool(12) as p:
@@ -23,7 +23,7 @@ def bm3d_CEST(
             )
             for d_img, dyn in res:
                 img[:, :, dyn] = d_img
-    return img
+    return img / 255.0
 
 
 def run_ml(args):
