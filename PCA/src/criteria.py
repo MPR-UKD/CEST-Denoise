@@ -1,31 +1,30 @@
 import numpy as np
-from matplotlib import pyplot as plt
+
+import numpy as np
 
 
-def malinowski_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
-    """Based on a theory of error concerning abstact factor analysis"""
-    RE = []
-    eigvals = np.sort(eigvals)[::-1]
-    eigvals_liste = []
-    for k in range(C_tilde_shape[1] - 1):
-        l = k + 1
-        eigvals_sum = np.sum(eigvals[l::])
-        eigvals_liste.append((eigvals_sum))
-        if C_tilde_shape[0] > C_tilde_shape[1]:
-            RE.append(
-                (abs(eigvals_sum) / (C_tilde_shape[0] * (C_tilde_shape[1] - k))) ** 0.5
-            )
-        elif C_tilde_shape[0] < C_tilde_shape[1]:
-            RE.append(
-                abs((eigvals_sum / (C_tilde_shape[1] * (C_tilde_shape[0] - k)))) ** 0.5
-            )
+def malinowski_criteria(eigenvalues, C_tilde_shape):
+    """
+    Determines the optimal number of k for the Malinowski method for adaptive noise reduction in CEST MRI data.
 
-    k_ind = []
-    for k in range(len(RE)):
-        k_ind.append(RE[k] / ((C_tilde_shape[1] - k) ** 2))
+    Parameters:
+    - C_tilde: the noise covariance matrix
+    - eigenvalues: the sorted eigenvalues of C_tilde
 
-    k_min = k_ind.index(min(k_ind))
-    return k_min
+    Returns:
+    - k_opt: the optimal number of k
+    """
+
+    m, n = C_tilde_shape[0], C_tilde_shape[1]
+    #
+    eigenvalues = abs(eigenvalues)
+    #eigvals /= eigvals.min()
+    m = 1
+    RE = np.zeros(n - 1)
+    for k in range(n - 1):
+        RE[k] = np.sqrt(np.sum(eigenvalues[k + 1:]) / (m * (n - k)))
+    k_opt = np.argmin(np.array([RE[k] / (m * (n - k) ** 2) for k in range(n - 1)]))
+    return k_opt
 
 
 def nelson_criteria(eigvals: np.ndarray, C_tilde_shape: tuple):
