@@ -39,6 +39,13 @@ def bm3d(
     if config is None:
         config = dict()
 
+    def confirm_size(value):
+        if value > img.shape[0]:
+            return False
+        if value > img.shape[1]:
+            return False
+        return True
+
     sigma = config.get("sigma", 25.0)  # variance of the noise
     lamb2d = config.get("lamb2d", 2.0)
     lamb3d = config.get("lamb3d", 2.7)
@@ -50,6 +57,8 @@ def bm3d(
         f"not supported. Currently the following discrete "
         f"transformation functions are supported: [cos, sin]"
     )
+    if mask is None:
+        mask = np.ones_like(img)
 
     # Step 1 - basic estimate
     step1_threshold_distance = config.get(
@@ -59,6 +68,11 @@ def bm3d(
     step1_BlockSize = config.get("step1_BlockSize", 8)  # BlockSize Step 1
     step1_WindowSize = config.get("step1_WindowSize", 39)  # search window size
 
+    if not confirm_size(step1_BlockSize):
+        raise ValueError
+    if not confirm_size(step1_WindowSize):
+        raise ValueError
+
     # Step 2 - final estimate
     step2_threshold_distance = config.get(
         "step2_threshold_distance", 400
@@ -67,6 +81,10 @@ def bm3d(
     step2_BlockSize = config.get("step2_BlockSize", 8)  # BlockSize Step 2
     step2_WindowSize = config.get("step2_WindowSize", 39)  # search window size
 
+    if not confirm_size(step2_BlockSize):
+        raise ValueError
+    if not confirm_size(step2_WindowSize):
+        raise ValueError
     # ===============================================================================================
 
     # ============================================ BM3D =============================================
