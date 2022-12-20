@@ -11,3 +11,8 @@ Subsequent Deep Learning based denoising methods are still under development.
 To test the different methods, various synthetic data are provided. In addition, a noise generator has been implemented to systematically test the algorithms with respect to various implemented image quality metrics such as PSNR, MSE and others.
 
 ### Current Version: 0.1 (BETA)
+
+
+# Support
+
+If you really like this repository and find it useful, please consider (★) starring it, so that it can reach a broader audience of like-minded people.
