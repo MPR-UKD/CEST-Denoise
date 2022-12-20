@@ -1,29 +1,39 @@
-import unittest
+import pytest
 
-import numpy as np
-from PCA.src.utils import img_to_casorati_matrix, calc_eig
-
-
-class TestUtils(unittest.TestCase):
-    def test_casorati_matrix_mask_is_None(self):
-        img = np.zeros((10, 10, 20))
-        casorati = img_to_casorati_matrix(img)
-        self.assertEqual(img.shape[0] * img.shape[1], casorati.shape[0])
-
-    def test_casorati_matrix_with_mask(self):
-        img = np.zeros((10, 10, 20))
-        mask = np.zeros((10, 10))
-        mask[:5, :5] = 1
-        casorati = img_to_casorati_matrix(img, mask)
-        self.assertEqual(mask.sum(), casorati.shape[0])
-
-    def test_order_eigval(self):
-        test_matrix = np.array([[0, 2], [2, 3]])
-        eigvals, eigvecs = calc_eig(test_matrix, "max")
-        self.assertEqual(eigvals.max(), eigvals[0])
-        eigvals, eigvecs = calc_eig(test_matrix, "min")
-        self.assertEqual(eigvals.min(), eigvals[0])
+from PCA.src.utils import *
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_img_to_casorati_matrix():
+    # Create a sample image and mask
+    img = np.array([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]])
+    mask = np.array([[1, 0], [1, 1]])
+
+    # Call the function with the sample image and mask
+    casorati_matrix = img_to_casorati_matrix(img, mask)
+
+    # Verify that the output is correct
+    expected_output = np.array([[1, 2, 3], [7, 8, 9], [10, 11, 12]])
+    assert (casorati_matrix == expected_output).all()
+
+
+def test_calc_eig():
+    # Create a sample matrix
+    matrix = np.array([[1, 2], [3, 4]])
+
+    # Call the function with the sample matrix and the "max" order
+    eigvals, eigvecs = calc_eig(matrix, "max")
+
+    expected_eigvals = np.array([(33 ** (1/2) + 5) / 2, (-33 ** (1/2) + 5) / 2])
+    assert (eigvals == expected_eigvals).all()
+
+    # Call the function with the sample matrix and the "min" order
+    eigvals, eigvecs = calc_eig(matrix, "min")
+
+    # Verify that the output is correct
+    expected_eigvals = np.array([(-33 ** (1/2) + 5) / 2, (33 ** (1/2) + 5) / 2])
+    assert (eigvals == expected_eigvals).all()
+
+
+
+if __name__ == '__main__':
+    pytest.main()
