@@ -1,4 +1,5 @@
 import itertools
+import random
 
 import numpy as np
 
@@ -36,7 +37,7 @@ def z_spectra(a: float, b: float, c: float, x: np.ndarray) -> np.ndarray:
 
 
 def generate_Z_3D(
-    img_size: tuple, dyn: int, ppm: float, a: float = 0.1, b: float = 1, c: float = 3
+    img_size: tuple, dyn: int, ppm: float, a: float = 0.1, b: float = 1, c: float = 3, delta: float = 0
 ) -> np.ndarray:
     """
     Generate a 3D array of Z values.
@@ -48,6 +49,7 @@ def generate_Z_3D(
     - a: float, representing the height of the Lorentzian curve (default value is 0.1)
     - b: float, representing the position of the peak of the Lorentzian curve (default value is 1)
     - c: float, representing the width of the Lorentzian curve at half-height (default value is 3)
+    - delta: float, representing the delta of the position (default value is 0.0)
 
     Returns:
     - np.ndarray, representing the 3D array of Z values
@@ -61,5 +63,8 @@ def generate_Z_3D(
     z = z_spectra(a, b, c, x)
 
     for x, y in itertools.product(range(img_size[0]), range(img_size[1])):
-        Z[x, y, :] = z
+        if delta == 0.0:
+            Z[x, y, :] = z
+        else:
+            Z[x, y, :] = z_spectra(a, b + random.random() * delta, c, x)
     return Z
