@@ -4,12 +4,19 @@ from numpy.fft import fftshift, ifftshift, fftn, ifftn
 
 class Noiser:
     def __init__(self, sigma: float = 0.01):
+        """
+        Initializes the Noiser object with the given sigma value.
+        """
         self.sigma = sigma
 
     def set_sigma(self, sigma: float):
         self.sigma = sigma
 
     def add_noise(self, imgs: np.ndarray, sigma: float | None = None) -> np.ndarray:
+        """
+        Adds Gaussian noise to the given images. If sigma is not provided, the sigma value
+        of the Noiser object is used.
+        """
         if sigma is None:
             sigma = self.sigma
         if len(imgs.shape) == 3:
@@ -23,6 +30,9 @@ class Noiser:
         return imgs
 
     def get_white_noise(self, shape: tuple, sigma: float) -> np.ndarray:
+        """
+        Generates white noise with the given shape and sigma value.
+        """
         dummy_img = np.zeros(shape)
         k_space_dummy = self.__transform_image_to_kspace(dummy_img)
         k_space_noise = self.__add_gaussian_noise(k_space_dummy, 1)
@@ -40,13 +50,6 @@ class Noiser:
         dim: np.ndarray | None = None,
         img_shape: tuple | None = None,
     ) -> np.ndarray:
-        """Computes the Fourier transform from k-space to image space
-        along a given or all dimensions
-        :param k: k-space data
-        :param dim: vector of dimensions to transform
-        :param img_shape: desired shape of output image
-        :returns: data in image space (along transformed dimensions)
-        """
         if not dim:
             dim = range(k.ndim)
         return ifftn(ifftshift(k), s=img_shape, axes=dim)
@@ -57,13 +60,6 @@ class Noiser:
         dim: np.ndarray | None = None,
         k_shape: tuple | None = None,
     ) -> np.ndarray:
-        """Computes the Fourier transform from image space to k-space space
-        along a given or all dimensions
-        :param img: image space data
-        :param dim: vector of dimensions to transform
-        :param k_shape: desired shape of output k-space data
-        :returns: data in k-space (along transformed dimensions)
-        """
         if not dim:
             dim = range(img.ndim)
         return fftshift(fftn(img, s=k_shape, axes=dim), axes=dim)
