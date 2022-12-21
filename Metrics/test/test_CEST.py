@@ -1,7 +1,7 @@
 import unittest
 from Metrics.src.CEST import mtr_asym, mtr_asym_curve
 import numpy as np
-from test_support_function.CEST import generate_Z_3D
+from test_support_function.src.CEST import generate_Z_3D
 
 
 class TestMtrAsym(unittest.TestCase):

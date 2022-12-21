@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from BM3D.src.denoise import bm3d, bm3d_CEST
-from test_support_function.CEST import generate_Z_3D
+from test_support_function.src.CEST import generate_Z_3D
 from Metrics.src.image_quality_estimation import IQS
 
 # Create mock input data

@@ -8,7 +8,7 @@ from NLM.src.denoise import (
 )
 from Metrics.src.image_quality_estimation import IQS
 import pytest
-from test_support_function.CEST import generate_Z_3D
+from test_support_function.src.CEST import generate_Z_3D
 
 
 def test_pad_image():

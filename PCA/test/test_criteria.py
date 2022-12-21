@@ -1,7 +1,7 @@
 from PCA.src.denoise import *
 from PCA.src.utils import *
 from Transform.src.noise import Noiser
-from test_support_function.CEST import generate_Z_3D
+from test_support_function.src.CEST import generate_Z_3D
 
 
 # Function to generate synthetic CEST data with specified image shape, dynamic range, and noise level

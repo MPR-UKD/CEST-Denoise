@@ -1,7 +1,7 @@
 import unittest
 from CEST.src.WASSR import WASSR
 import numpy as np
-from test_support_function.CEST import generate_Z_3D
+from test_support_function.src.CEST import generate_Z_3D
 
 
 class TestWASSR(unittest.TestCase):

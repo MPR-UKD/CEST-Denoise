@@ -1,6 +1,6 @@
 from Metrics.src.image_quality_estimation import IQS
 import pytest
-from test_support_function.CEST import generate_Z_3D
+from test_support_function.src.CEST import generate_Z_3D
 from PCA.src.denoise import pca
 import numpy as np
 

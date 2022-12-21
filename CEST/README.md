@@ -15,12 +15,13 @@ The **'CEST'** class is a class for performing Chemical Exchange Saturation Tran
 - **'run'**: This method performs both WASSR correction and CEST correction on the data. It first calls the wassr_correction method, and then calls the cest_correction method and returns the result.
 
 ## Example
+
 ````python
 # Import the numpy library
 import numpy as np
 from CEST.src.CEST import CEST
 from Metrics.src.CEST import mtr_asym
-from test_support_function.CEST import generate_Z_3D
+from test_support_function.src.CEST import generate_Z_3D
 import matplotlib.pyplot as plt
 
 # Generate some fake CEST and WASSR data and a mask for the CEST data
@@ -28,8 +29,9 @@ import matplotlib.pyplot as plt
 # WASSR - 21 dynamics, ppm offsets between -1 and 1, lorentzian amplitude 1, frequency offset 0.5 ppm
 wassr = generate_Z_3D(img_size=(10, 10), dyn=21, ppm=1, a=1, b=0.5, c=1)
 # Two pool CEST Data with 41 dynamics and a CEST peak at 2 ppm
-cest = generate_Z_3D(img_size=(2, 2), dyn=41, ppm=4, a=1, b=0.5, c=1) + generate_Z_3D(img_size=(2, 2), dyn=41, ppm=4, a=0.2, b=2, c=0.5)
-    
+cest = generate_Z_3D(img_size=(2, 2), dyn=41, ppm=4, a=1, b=0.5, c=1) + generate_Z_3D(img_size=(2, 2), dyn=41, ppm=4,
+                                                                                      a=0.2, b=2, c=0.5)
+
 mask = np.ones((10, 10))
 
 # Create a CEST object with the fake data and some config values

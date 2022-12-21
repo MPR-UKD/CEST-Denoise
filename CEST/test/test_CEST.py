@@ -1,7 +1,7 @@
 import numpy as np
 
 from CEST.src.CEST import CEST
-from test_support_function.CEST import generate_Z_3D
+from test_support_function.src.CEST import generate_Z_3D
 import pytest
 from Metrics.src.CEST import mtr_asym
 
