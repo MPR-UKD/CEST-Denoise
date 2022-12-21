@@ -1,0 +1,3 @@
+# Configuration parameters for the PCA denoising algorithm
+mode: CEST  # only CEST implemented
+criteria: 'median'  # Criteria for selecting the principal components to keep ('median', 'nelson', 'malinowski' or int)

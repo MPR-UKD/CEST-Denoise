@@ -1,0 +1,15 @@
+# Configuration parameters for the BM3D denoising algorithm
+mode: CEST  # Denoising mode (image or CEST)
+sigma: 25  # Standard deviation of the Gaussian noise
+lamb2d: 2  # Strength of the 2D transformation applied to the blocks in the first step of the denoising process
+lamb3d: 2.7  # Strength of the 3D transformation applied to the blocks in the second step of the denoising process
+KaiserWindowBeta: 2  # Parameter that controls the shape of the Kaiser window used in the block matching process
+TransformationFunction: cos  # Discrete transformation function to be used in the block matching process (cos or sin)
+step1_threshold_distance: 2500  # Threshold distance used in the first step of the denoising process
+step1_max_match: 16  # Maximum number of matched blocks used in the first step of the denoising process
+step1_BlockSize: 8  # Block size used in the first step of the denoising process
+step1_WindowSize: 39  # Search window size used in the first step of the denoising process
+step2_threshold_distance: 400 # Threshold distance used in the second step of the denoising process
+step2_max_match: 32  # Maximum number of matched blocks used in the second step of the denoising process
+step2_BlockSize: 8  # Block size used in the second step of the denoising process
+step2_WindowSize: 39  # Search window size used in the second step of the denoising process

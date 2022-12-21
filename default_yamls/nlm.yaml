@@ -1,0 +1,4 @@
+# Configuration parameters for the NLM denoising algorithm
+mode: CEST  # Denoising mode (image or CEST)
+big_window_size: 15  # Size of the big window used in the denoising process
+small_window_size: 3  # Size of the small window used in the denoising process
