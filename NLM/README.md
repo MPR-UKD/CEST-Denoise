@@ -2,7 +2,7 @@
 
 This package provides an implementation of the Non-Local Means (NLM) denoising algorithm for 2D and 3D images. The main function for denoising is **'nlm'**, which takes an input image, a large window size, and a small window size and returns the denoised image.
 
-# Functionality
+## Functionality
 The main function for denoising is **'nlm(image, big_window_size, small_window_size)'**, which takes the following inputs:
 
 - **'image'**: The input image to be denoised, which should be a 2D or 3D numpy array.
@@ -15,7 +15,7 @@ There is also a function **'nlm_CEST'** that can be used to denoise that can be 
 
 The NLM denoising algorithm works by comparing each pixel in the image to its neighbors within a specified search window, and weighting the contribution of each neighbor based on the distance between them. The final denoised pixel value is the weighted average of all the neighbor values.
 
-# Example
+## Example
 
 ````python
 import numpy as np
