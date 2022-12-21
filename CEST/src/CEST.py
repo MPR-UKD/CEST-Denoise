@@ -1,5 +1,6 @@
 import numpy as np
 
+# Import the cest_correction and WASSR functions from the CEST package
 from CEST.src.cest_correction import cest_correction
 from CEST.src.WASSR import WASSR
 
@@ -7,37 +8,45 @@ from CEST.src.WASSR import WASSR
 class CEST:
     def __init__(
         self,
-        cest: np.ndarray,
-        wassr: np.ndarray,
-        mask: np.ndarray,
-        cest_range: float,
-        wassr_range: float,
-        itp_step: float,
-        max_wassr_offset: float,
+        cest: np.ndarray,  # numpy array containing the CEST data
+        wassr: np.ndarray,  # numpy array containing the WASSR data
+        mask: np.ndarray,  # numpy array containing the mask for the CEST data
+        cest_range: float,  # range of the CEST data
+        wassr_range: float,  # range of the WASSR data
+        itp_step: float,  # step size to use for interpolation
+        max_wassr_offset: float,  # maximum offset to use for the WASSR correction
     ):
         self.cest = cest
         self.wassr = wassr
         self.mask = mask
         self.config = {
-            "cest_range": cest_range,
-            "wassr_range": wassr_range,
-            "itp_step": itp_step,
-            "max_wassr_offset": max_wassr_offset,
+            "cest_range": cest_range,  # range of the CEST data
+            "wassr_range": wassr_range,  # range of the WASSR data
+            "itp_step": itp_step,  # step size to use for interpolation
+            "max_wassr_offset": max_wassr_offset,  # maximum offset to use for the WASSR correction
         }
 
     def run(self):
-        self.wassr_correction()
-        return self.cest_correction()
+        """Perform both WASSR correction and CEST correction on the data."""
+        self.wassr_correction()  # perform WASSR correction
+        return self.cest_correction()  # perform CEST correction
 
     def wassr_correction(self):
+        """Perform WASSR correction on the data."""
+        # Create a WASSR object with the maximum offset and ppm range specified in the config
         wassr = WASSR(
             max_offset=self.config["max_wassr_offset"], ppm=self.config["wassr_range"]
         )
+        # Calculate the offset map and mask for the WASSR data
         self.offset_map, self.mask = wassr.calculate(
-            wassr=self.wassr, mask=self.mask, hStep=self.config["itp_step"]
+            wassr=self.wassr,  # WASSR data
+            mask=self.mask,  # mask for the CEST data
+            hStep=self.config["itp_step"],  # step size to use for interpolation
         )
 
     def cest_correction(self):
+        """Perform CEST correction on the data."""
+        # Calculate the corrected x-axis values for the CEST data
         x_calcentires = np.arange(
             -self.config["cest_range"] + self.config["max_wassr_offset"],
             self.config["cest_range"] - self.config["max_wassr_offset"],
