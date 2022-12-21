@@ -50,6 +50,9 @@ denoised_image = bm3d(noisy_image, config)
 # Save the denoised image
 np.save('denoised_image.npy', denoised_image)
 ````
+## Performance
+
+The BM3D denoising algorithm can be computationally expensive, especially when applied to large images. It is recommended to experiment with different configurations to find the best trade-off between denoising performance and computational time.
 
 ## Contribution
 
