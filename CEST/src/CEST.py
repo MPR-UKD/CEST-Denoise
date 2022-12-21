@@ -28,10 +28,10 @@ class CEST:
 
     def run(self):
         """Perform both WASSR correction and CEST correction on the data."""
-        self.wassr_correction()  # perform WASSR correction
-        return self.cest_correction()  # perform CEST correction
+        self.__wassr_correction()  # perform WASSR correction
+        return self.__cest_correction()  # perform CEST correction
 
-    def wassr_correction(self):
+    def __wassr_correction(self):
         """Perform WASSR correction on the data."""
         # Create a WASSR object with the maximum offset and ppm range specified in the config
         wassr = WASSR(
@@ -44,7 +44,7 @@ class CEST:
             hStep=self.config["itp_step"],  # step size to use for interpolation
         )
 
-    def cest_correction(self):
+    def __cest_correction(self):
         """Perform CEST correction on the data."""
         # Calculate the corrected x-axis values for the CEST data
         x_calcentires = np.arange(
