@@ -14,7 +14,7 @@ class Noiser:
 
     def add_noise(self, imgs: np.ndarray, sigma: float | None = None) -> np.ndarray:
         """
-        Adds Gaussian noise to the given images. If sigma is not provided, the sigma value
+        Adds white noise to the given images. If sigma is not provided, the sigma value
         of the Noiser object is used.
         """
         if sigma is None:
