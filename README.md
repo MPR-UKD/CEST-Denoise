@@ -88,3 +88,7 @@ python denoise_cli.py input.nii.gz output.nii.gz BM3D --config custom_config.yam
 ## Comparison of the denoising performance
 
 Coming soon
+
+
+## Support
+If you really like this repository and find it useful, please consider (★) starring it, so that it can reach a broader audience of like-minded people.
