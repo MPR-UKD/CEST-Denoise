@@ -19,7 +19,7 @@ class TestLoader(unittest.TestCase):
         img = np.ones((10, 10, 10))
         nib.save(nib.Nifti1Image(img, np.eye(4)), self.mask_file)
         # Create a dummy LoaderCEST instance for testing
-        self.loader = LoaderCEST(self.image_file)
+        self.loader = LoaderNiftiCEST(self.image_file)
 
     def test_len(self):
         # Test the __len__ method of the LoaderCEST class

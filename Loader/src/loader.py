@@ -24,7 +24,7 @@ class Loader(ABC):
         pass
 
 
-class LoaderCEST(Loader):
+class LoaderNiftiCEST(Loader):
     def __init__(self, path: Path):
         super().__init__(path)
 
