@@ -43,7 +43,7 @@ For more information on how to use each package, see the corresponding ReadMe fi
 
 This command-line interface (CLI) allows you to denoise NIFTI images using the BM3D, NLM, or PCA algorithms.
 
-#### Usage
+### Usage
 
 To use the CLI, you will need to install the required dependencies and have Python 3.6 or later installed. You can then run the CLI by calling python denoise_cli.py from the command line, followed by the required arguments.
 
@@ -58,7 +58,7 @@ You can also specify the following optional arguments:
 - **'--mask_path'**: the path to a mask NIFTI image, which can be used to denoise only certain regions of the input image
 - **'--config'**: the path to a YAML file containing configuration parameters for the denoising algorithm. If no path is specified, the default configuration will be used.
 
-#### Configuration
+### Configuration
 
 The CLI allows you to specify configuration parameters for the denoising algorithms using a YAML file. The structure of this file will depend on the chosen algorithm and the parameters it supports.
 
@@ -70,7 +70,7 @@ By default, the CLI will use the following configuration files for each algorith
 
 You can override these default configurations by specifying your own YAML file using the **'--config'** argument.
 
-#### Example
+### Example
 
 To denoise an image using the NLM algorithm and the default configuration, you can run the following command:
 
