@@ -1,0 +1,1 @@
+<span style="color:red; font-size:24px">In the future, an autoencoder for denoising MR data will be created here (focus: CEST data).</span>
