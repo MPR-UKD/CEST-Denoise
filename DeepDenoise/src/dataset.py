@@ -69,8 +69,8 @@ class CESTDataset(Dataset):
 
         # Transpose the image arrays to match PyTorch's convention
         sample = {
-            "ground_truth": img.transpose(2, 0, 1, 3),
-            "noisy": noisy_img.transpose(2, 0, 1, 3),
+            "ground_truth": img.transpose(2, 3, 0, 1),
+            "noisy": noisy_img.transpose(2, 3, 0, 1),
         }
 
         # Apply transform (if provided)
