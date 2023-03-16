@@ -20,14 +20,15 @@ def test_dataset_len():
     assert dataset_val.__len__() == 2
     assert dataset_test.__len__() == 1
 
+
 def test_dataset_keys():
     dataset_train = CESTDataset(
         root_dir=Path("test_data"),
         mode="train",
     )
     data = dataset_train.__getitem__(0)
-    assert 'ground_truth' in data.keys()
-    assert 'noisy' in data.keys()
+    assert "ground_truth" in data.keys()
+    assert "noisy" in data.keys()
 
 
 def test_dataset_shape():
@@ -36,11 +37,11 @@ def test_dataset_shape():
         mode="train",
     )
     data = dataset_train.__getitem__(0)
-    assert data['ground_truth'].size()[0] == 1
-    assert data['ground_truth'].size()[1] == 128
-    assert data['ground_truth'].size()[2] == 128
-    assert data['ground_truth'].size()[3] == 42
+    assert data["ground_truth"].size()[0] == 1
+    assert data["ground_truth"].size()[1] == 128
+    assert data["ground_truth"].size()[2] == 128
+    assert data["ground_truth"].size()[3] == 42
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

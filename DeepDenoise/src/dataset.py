@@ -9,12 +9,14 @@ from Transform.src import Noiser
 
 
 class CESTDataset(Dataset):
-    def __init__(self,
-                 root_dir: Path,
-                 mode: str,
-                 distribution: list | None = None,
-                 noise_std: float = 0.1,
-                 transform=None):
+    def __init__(
+        self,
+        root_dir: Path,
+        mode: str,
+        distribution: list | None = None,
+        noise_std: float = 0.1,
+        transform=None,
+    ):
 
         # If distribution parameter is not provided, set default values
         distribution = distribution if distribution is not None else [0.7, 0.2, 0.1]
@@ -26,7 +28,7 @@ class CESTDataset(Dataset):
         self.transform = transform
 
         # Get all nii files in root directory
-        files = [_.absolute() for _ in root_dir.glob('*.nii')]
+        files = [_.absolute() for _ in root_dir.glob("*.nii")]
 
         # Set the start and end index for the file list based on mode
         if mode == "train":
@@ -36,7 +38,11 @@ class CESTDataset(Dataset):
             start = int(distribution[0] * len(files)) - 1
             end = start + int(distribution[1] * len(files))
         elif mode == "test":
-            start = int(distribution[0] * len(files)) + int(distribution[1] * len(files)) - 1
+            start = (
+                int(distribution[0] * len(files))
+                + int(distribution[1] * len(files))
+                - 1
+            )
             end = -1
         else:
             # Raise an error if mode is invalid
@@ -62,15 +68,17 @@ class CESTDataset(Dataset):
         noisy_img = self.noiser.add_noise(img)
 
         # Transpose the image arrays to match PyTorch's convention
-        sample = {'ground_truth': img.transpose(2, 0, 1, 3),
-                  'noisy': noisy_img.transpose(2, 0, 1, 3)}
+        sample = {
+            "ground_truth": img.transpose(2, 0, 1, 3),
+            "noisy": noisy_img.transpose(2, 0, 1, 3),
+        }
 
         # Apply transform (if provided)
         if self.transform:
             sample = self.transform(sample)
 
         # Convert numpy arrays to PyTorch tensors
-        sample['ground_truth'] = torch.tensor(sample['ground_truth'])
-        sample['noisy'] = torch.tensor(sample['noisy'])
+        sample["ground_truth"] = torch.tensor(sample["ground_truth"])
+        sample["noisy"] = torch.tensor(sample["noisy"])
 
         return sample
