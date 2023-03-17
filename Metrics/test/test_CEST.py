@@ -1,5 +1,6 @@
 import unittest
-from Metrics.src.CEST import mtr_asym, mtr_asym_curve
+from Metrics.src.CEST import mtr_asym
+from Metrics.src.utils import mtr_asym_curve
 import numpy as np
 from test_support_function.src.CEST import generate_Z_3D
 
