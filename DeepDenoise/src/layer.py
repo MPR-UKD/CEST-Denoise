@@ -72,6 +72,10 @@ class ResLayer(nn.Module):
         self.bn2 = nn.BatchNorm2d(out_channels)
         self.relu2 = nn.ReLU(inplace=True)
 
+        # 1x1 convolutional layer to change the number of channels in the residual
+        self.shortcut = nn.Conv2d(in_channels, out_channels, kernel_size=1, stride=1, padding=0, bias=False)
+        self.bn_shortcut = nn.BatchNorm2d(out_channels)
+
     def forward(self, x):
         residual = x
 
@@ -81,6 +85,10 @@ class ResLayer(nn.Module):
 
         out = self.conv2(out)
         out = self.bn2(out)
+
+        # Update residual to match the number of channels
+        residual = self.shortcut(residual)
+        residual = self.bn_shortcut(residual)
 
         out += residual
         out = self.relu2(out)
