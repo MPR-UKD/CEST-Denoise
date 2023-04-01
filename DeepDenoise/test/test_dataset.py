@@ -37,10 +37,9 @@ def test_dataset_shape():
         mode="train",
     )
     data = dataset_train.__getitem__(0)
-    assert data["ground_truth"].size()[0] == 1
-    assert data["ground_truth"].size()[1] == 42
+    assert data["ground_truth"].size()[0] == 42
+    assert data["ground_truth"].size()[1] == 128
     assert data["ground_truth"].size()[2] == 128
-    assert data["ground_truth"].size()[3] == 128
 
 
 if __name__ == "__main__":

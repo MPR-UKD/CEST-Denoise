@@ -23,7 +23,7 @@ def test_data_module(data_module):
 
 def test_train_data(data_module):
     train_dataloader = data_module.train_dataloader()
-    assert len(train_dataloader.dataset) == 5
+    assert len(train_dataloader.dataset) == 7
     for data in train_dataloader:
         assert "ground_truth" in data
         assert "noisy" in data
