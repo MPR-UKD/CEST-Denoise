@@ -10,12 +10,14 @@ class CESTUnet(pl.LightningModule):
         input_shape=(42, 128, 128),
         depth: int = 4,
         learning_rate=1e-3,
+        noise_estimation: bool = False
     ):
         super().__init__()
 
         self.input_shape = input_shape
         self.depth = depth
         self.learning_rate = learning_rate
+        self.noise_estimation = noise_estimation
 
         # Encoder
         self.encoder = nn.ModuleList()
@@ -52,6 +54,7 @@ class CESTUnet(pl.LightningModule):
     def forward(self, x):
         # Move input data to the GPU
         x = x.to(self.device)
+        input_img = x
 
         # Encoder
         x = self.inc(x)
@@ -69,13 +72,13 @@ class CESTUnet(pl.LightningModule):
 
         x = self.output_layer(x)
 
-        return x
+        return input_img - x if self.noise_estimation else x
 
     def training_step(self, batch, batch_idx):
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
-        self.log("train_loss", loss)
+        self.log("loss", loss)
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -83,6 +86,14 @@ class CESTUnet(pl.LightningModule):
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
         self.log("val_loss", loss)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        x, y = batch["noisy"], batch["ground_truth"]
+        y_hat = self(x)
+        loss = self.loss_fn(y_hat, y)
+        self.log("test_loss", loss)
+        return loss
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
