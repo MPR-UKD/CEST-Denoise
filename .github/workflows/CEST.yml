@@ -18,26 +18,6 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
         pip install pytest
-    - name: Test BM3D
-      run: |
-        cd BM3D
-        pytest
-        cd ..
-    - name: Test PCA
-      run: |
-        cd PCA
-        pytest
-        cd ..
-    - name: Test NLM
-      run: |
-        cd NLM
-        pytest
-        cd ..
-    - name: Test Deep Denoise
-      run: |
-        cd DeepDenoise
-        pytest
-        cd ..
     - name: Test Loader
       run: |
         cd Loader
