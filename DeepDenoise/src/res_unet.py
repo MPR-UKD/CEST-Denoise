@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
+from DeepDenoise.src.layer import *
 
 
 class CESTResUNet(pl.LightningModule):
@@ -9,12 +10,14 @@ class CESTResUNet(pl.LightningModule):
         input_shape=(42, 128, 128),
         depth: int = 4,
         learning_rate=1e-3,
+        noise_estimation: bool = False
     ):
         super().__init__()
 
         self.input_shape = input_shape
         self.depth = depth
         self.learning_rate = learning_rate
+        self.noise_estimation = noise_estimation
 
         # Encoder
         self.encoder = nn.ModuleList()
@@ -39,31 +42,27 @@ class CESTResUNet(pl.LightningModule):
             ResLayer(features, features),
             ResLayer(features, features)
         )
-
         features *= 2
         # Decoder
         self.decoder = nn.ModuleList()
         for i in range(depth):
             self.decoder.append(
                 Up(
-                    int(features),
-                    int(features / 4),
+                    features,
+                    features // 4,
                     True
                 )
             )
-            features /= 2
+            features //= 2
         self.decoder.append(
             Up(
-                int(features),
-                int(features / 2),
+                features,
+                features // 2,
                 False
             )
         )
 
-        self.output_layer = nn.Sequential(
-            nn.Conv2d(int(features / 2), input_shape[0], kernel_size=1),
-            nn.Sigmoid()
-        )
+        self.output_layer = OutConv(int(features / 2), input_shape[0])
 
         # Define loss function
         self.loss_fn = nn.MSELoss()
@@ -71,6 +70,8 @@ class CESTResUNet(pl.LightningModule):
     def forward(self, x):
         # Encoder
         x = self.inc(x)
+        input_img = x
+
         encoding_outputs = [x]
         for enc in self.encoder:
             x = enc(x)
@@ -81,11 +82,11 @@ class CESTResUNet(pl.LightningModule):
 
         # Decoder
         for i, dec in enumerate(self.decoder):
-            x = dec(x, encoding_outputs[-(i + 2)])
+            x = dec(x, encoding_outputs[-(i + 1)])
 
         x = self.output_layer(x)
 
-        return x
+        return input_img - x if self.noise_estimation else x
 
     def training_step(self, batch, batch_idx):
         x, y = batch["noisy"], batch["ground_truth"]
@@ -99,6 +100,14 @@ class CESTResUNet(pl.LightningModule):
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
         self.log("val_loss", loss)
+        return loss
+
+    def test_step(self, batch, batch_idx):
+        x, y = batch["noisy"], batch["ground_truth"]
+        y_hat = self(x)
+        loss = self.loss_fn(y_hat, y)
+        self.log("val_loss", loss)
+        return loss
 
     def configure_optimizers(self):
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
