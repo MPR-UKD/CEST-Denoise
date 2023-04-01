@@ -27,6 +27,7 @@ class CESTDataModule(pl.LightningDataModule):
         dir: str | Path,
         distribution: list | None = None,
         batch_size: int = 1,
+        workers: int = 1,
         transform: None | Callable = None,
         noise_std: float = 0.1,
     ):
@@ -38,12 +39,13 @@ class CESTDataModule(pl.LightningDataModule):
         self.val_dataset = get_dataset(dir, "val", distribution, noise_std, transform)
         self.test_dataset = get_dataset(dir, "test", distribution, noise_std, transform)
         self.batch_size = batch_size
+        self.workers = workers
 
     def train_dataloader(self):
-        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True)
+        return DataLoader(self.train_dataset, batch_size=self.batch_size, shuffle=True, num_workers=self.workers)
 
     def val_dataloader(self):
-        return DataLoader(self.val_dataset, batch_size=self.batch_size)
+        return DataLoader(self.val_dataset, batch_size=self.batch_size, num_workers=self.workers)
 
     def test_dataloader(self):
-        return DataLoader(self.test_dataset, batch_size=self.batch_size)
+        return DataLoader(self.test_dataset, batch_size=self.batch_size, num_workers=self.workers)
