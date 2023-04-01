@@ -61,16 +61,15 @@ class CESTDataset(Dataset):
 
         # Load the image at the given index
         img_path = self.file_list[idx]
-        img_nii = nib.load(img_path)
-        img = img_nii.get_fdata()
+        img = load_z(img_path)
 
         # Add noise to the image using the Noiser class
         noisy_img = self.noiser.add_noise(img)
 
         # Transpose the image arrays to match PyTorch's convention
         sample = {
-            "ground_truth": img.transpose(2, 3, 0, 1),
-            "noisy": noisy_img.transpose(2, 3, 0, 1),
+            "ground_truth": img.transpose(2, 3, 0, 1).squeeze(),
+            "noisy": noisy_img.transpose(2, 3, 0, 1).squeeze(),
         }
 
         # Apply transform (if provided)
@@ -78,7 +77,13 @@ class CESTDataset(Dataset):
             sample = self.transform(sample)
 
         # Convert numpy arrays to PyTorch tensors
-        sample["ground_truth"] = torch.tensor(sample["ground_truth"])
-        sample["noisy"] = torch.tensor(sample["noisy"])
+        sample["ground_truth"] = torch.tensor(sample["ground_truth"]).float()
+        sample["noisy"] = torch.tensor(sample["noisy"]).float()
 
         return sample
+
+
+def load_z(img_path):
+    img_nii = nib.load(img_path)
+    img = img_nii.get_fdata() / 4016
+    return img
