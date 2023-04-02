@@ -1,4 +1,5 @@
 import numpy as np
+from Metrics.src.image_quality_estimation import IQS
 from NLM.src.denoise import (
     nlm,
     nlm_CEST,
@@ -6,7 +7,6 @@ from NLM.src.denoise import (
     get_comparison_neighborhood,
     get_small_neighborhood,
 )
-from Metrics.src.image_quality_estimation import IQS
 import pytest
 from test_support_function.src.CEST import generate_Z_3D
 

@@ -1,4 +1,4 @@
-name: Python 3.10
+name: DeepDenoise
 
 on: [push, pull_request]
 
