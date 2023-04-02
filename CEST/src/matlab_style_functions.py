@@ -4,7 +4,7 @@ from numba import jit
 from typing import Tuple
 
 
-@jit(nopython=True)
+#@jit(nopython=True)
 # Define a function to generate a 2D Gaussian kernel using the shape and sigma as inputs
 def matlab_style_gauss2D(
     shape: Tuple[int, int], sigma: float = 1.0
