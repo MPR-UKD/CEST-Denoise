@@ -7,7 +7,7 @@ from DeepDenoise.src.dataloader import CESTDataModule
 @pytest.fixture
 def data_module():
     return CESTDataModule(
-        dir="test_data",
+        dir="test/test_data",
         distribution=[0.7, 0.2, 0.1],
         batch_size=2,
         transform=None,

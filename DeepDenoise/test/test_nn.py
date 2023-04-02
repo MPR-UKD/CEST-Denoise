@@ -19,7 +19,7 @@ def test_unet():
     assert y.shape == (1, 42, 128, 128)
 
     # Test the model on a real CEST image
-    img_path = Path("test_data/00001.nii")
+    img_path = Path("test/test_data/00001.nii")
     img_nii = nib.load(img_path)
     img = img_nii.get_fdata().transpose(2, 3, 0, 1)
     img_tensor = torch.from_numpy(img).float()
@@ -47,7 +47,7 @@ def test_res_unet():
     assert y.shape == (1, 42, 128, 128)
 
     # Test the model on a real CEST image
-    img_path = Path("test_data/00001.nii")
+    img_path = Path("test/test_data/00001.nii")
     img_nii = nib.load(img_path)
     img = img_nii.get_fdata().transpose(2, 3, 0, 1)
     img_tensor = torch.from_numpy(img).float()

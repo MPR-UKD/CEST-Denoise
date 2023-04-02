@@ -5,15 +5,15 @@ from pathlib import Path
 
 def test_dataset_len():
     dataset_train = CESTDataset(
-        root_dir=Path("test_data"),
+        root_dir=Path("test/test_data"),
         mode="train",
     )
     dataset_val = CESTDataset(
-        root_dir=Path("test_data"),
+        root_dir=Path("test/test_data"),
         mode="val",
     )
     dataset_test = CESTDataset(
-        root_dir=Path("test_data"),
+        root_dir=Path("test/test_data"),
         mode="test",
     )
     assert dataset_train.__len__() == 7
@@ -23,7 +23,7 @@ def test_dataset_len():
 
 def test_dataset_keys():
     dataset_train = CESTDataset(
-        root_dir=Path("test_data"),
+        root_dir=Path("test/test_data"),
         mode="train",
     )
     data = dataset_train.__getitem__(0)
@@ -33,7 +33,7 @@ def test_dataset_keys():
 
 def test_dataset_shape():
     dataset_train = CESTDataset(
-        root_dir=Path("test_data"),
+        root_dir=Path("test/test_data"),
         mode="train",
     )
     data = dataset_train.__getitem__(0)
