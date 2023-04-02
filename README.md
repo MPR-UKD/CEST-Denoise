@@ -4,6 +4,12 @@
 
 # DeNoise
 
+[![Actions Status](https://github.com/ludgerradke/DeNoise/actions/workflows/BM3D.yml/badge.svg)](https://github.com/ludgerradke/DeNoise/actions/workflows/BM3D.yml/badge.svg)
+[![Actions Status](https://github.com/ludgerradke/DeNoise/actions/workflows/CEST.yml/badge.svg)](https://github.com/ludgerradke/DeNoise/actions/workflows/CEST.yml/badge.svg)
+[![Actions Status](https://github.com/ludgerradke/DeNoise/actions/workflows/DeepDenoise.yml/badge.svg)](https://github.com/ludgerradke/DeNoise/actions/workflows/DeepDenoise.yml/badge.svg)
+[![Actions Status](https://github.com/ludgerradke/DeNoise/actions/workflows/NLM.yml/badge.svg)](https://github.com/ludgerradke/DeNoise/actions/workflows/NLM.yml/badge.svg)
+[![Actions Status](https://github.com/ludgerradke/DeNoise/actions/workflows/PCA.yml/badge.svg)](https://github.com/ludgerradke/DeNoise/actions/workflows/PCA.yml/badge.svg)
+
 This GitHub repository contains several Python packages that provide various functions in the field of image processing. The available packages are:
 
 - **'BM3D'**: An implementation of the BM3D (Block Matching and 3D Filtering) noise reduction algorithm for 2D and 3D images.
