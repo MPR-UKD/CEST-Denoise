@@ -65,7 +65,7 @@ def test_grouping():
         discrete_transform_blocks_basic,
         discrete_transform_blocks_noisy,
     )
-    assert block_positions.shape == (block_groups_noisy.shape, 2)
+    assert block_positions.shape == (block_groups_noisy.shape[0], 2)
     assert block_groups_basic.shape == (
         max_number_of_similar_blocks,
         block_size,
