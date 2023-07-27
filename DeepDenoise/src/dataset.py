@@ -1,7 +1,7 @@
 from pathlib import Path
 from pathlib import Path
 from typing import List, Dict, Union
-
+import numpy as np
 import nibabel as nib
 import torch
 from torch.utils.data import Dataset
@@ -99,7 +99,7 @@ class CESTDataset(Dataset):
         img = load_z(img_path)
 
         # Add noise to the image using the Noiser class
-        noisy_img = self.noiser.add_noise(img)
+        noisy_img = self.noiser.add_noise(img.copy())
 
         # Transpose the image arrays to match PyTorch's convention
         sample = {
