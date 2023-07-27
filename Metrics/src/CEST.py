@@ -34,7 +34,9 @@ def mtr_asym(
     return mtr_asym, mtr_asym_img
 
 
-def multi_lorentzian_fit(Z: np.ndarray, mask: np.ndarray, ppm: float, pools: list[LorentzianPool]) -> dict:
+def multi_lorentzian_fit(
+    Z: np.ndarray, mask: np.ndarray, ppm: float, pools: list[LorentzianPool]
+) -> dict:
     """
     Perform Multi-Lorentzian fit for each pool and return the resulting images.
 
@@ -50,7 +52,14 @@ def multi_lorentzian_fit(Z: np.ndarray, mask: np.ndarray, ppm: float, pools: lis
     """
     num_rows, num_cols, num_dynamics = Z.shape
     ppm_values = np.linspace(-ppm, ppm, num_dynamics)
-    result_images = {pool.name: {"amplitude": np.zeros((num_rows, num_cols)), "width": np.zeros((num_rows, num_cols)), "position": np.zeros((num_rows, num_cols))} for pool in pools}
+    result_images = {
+        pool.name: {
+            "amplitude": np.zeros((num_rows, num_cols)),
+            "width": np.zeros((num_rows, num_cols)),
+            "position": np.zeros((num_rows, num_cols)),
+        }
+        for pool in pools
+    }
 
     for row in range(num_rows):
         for col in range(num_cols):
@@ -66,13 +75,27 @@ def multi_lorentzian_fit(Z: np.ndarray, mask: np.ndarray, ppm: float, pools: lis
                     gamma0 = pool.width_bounds[1]
                     p0.extend([A0, x0, gamma0])
 
-                    bounds_lower.extend([pool.amplitude_bounds[0], pool.position_bounds[0], pool.width_bounds[0]])
-                    bounds_upper.extend([pool.amplitude_bounds[2], pool.position_bounds[2], pool.width_bounds[2]])
+                    bounds_lower.extend(
+                        [
+                            pool.amplitude_bounds[0],
+                            pool.position_bounds[0],
+                            pool.width_bounds[0],
+                        ]
+                    )
+                    bounds_upper.extend(
+                        [
+                            pool.amplitude_bounds[2],
+                            pool.position_bounds[2],
+                            pool.width_bounds[2],
+                        ]
+                    )
 
                 bounds = (bounds_lower, bounds_upper)
 
                 try:
-                    popt, _ = curve_fit(multi_lorentzian, ppm_values, y_data, p0=p0, bounds=bounds)
+                    popt, _ = curve_fit(
+                        multi_lorentzian, ppm_values, y_data, p0=p0, bounds=bounds
+                    )
                     for i, pool in enumerate(pools):
                         result_images[pool.name]["amplitude"][row, col] = popt[i * 3]
                         result_images[pool.name]["position"][row, col] = popt[i * 3 + 1]
@@ -84,4 +107,3 @@ def multi_lorentzian_fit(Z: np.ndarray, mask: np.ndarray, ppm: float, pools: lis
                         result_images[pool.name]["width"][row, col] = np.nan
 
     return result_images
-
