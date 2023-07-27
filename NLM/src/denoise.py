@@ -51,7 +51,6 @@ def nlm(image, big_window_size, small_window_size):
     # For each pixel in the actual image, find a area around the pixel that needs to be compared
     for image_x in range(pad_width, pad_width + image.shape[1]):
         for image_y in range(pad_width, pad_width + image.shape[0]):
-
             org_img_x_pixel = image_x - pad_width
             org_img_y_pixel = image_y - pad_width
             new_pixel_value, norm_factor = 0, 0

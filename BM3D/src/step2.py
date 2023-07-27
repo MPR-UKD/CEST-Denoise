@@ -53,7 +53,6 @@ def step2_final_estimation(
         range(int((basic_estimate_img.shape[0] - BlockSize))),
         range(int((basic_estimate_img.shape[1] - BlockSize))),
     ):
-
         ref_block_position = (x, y)
         if mask[x, y] == 0:
             continue
@@ -143,7 +142,6 @@ def grouping(
 
     for i in range(window_size - block_size + 1):
         for j in range(window_size - block_size + 1):
-
             current_block_position = (search_window[0, 0] + i, search_window[0, 1] + j)
 
             block = basic_estimate_image[

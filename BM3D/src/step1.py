@@ -59,7 +59,6 @@ def step1_basic_estimation(
         range(int((noisy_img.shape[0] - BlockSize))),
         range(int((noisy_img.shape[1] - BlockSize))),
     ):
-
         ref_block_position = (x, y)
         if mask[x, y] == 0:
             continue

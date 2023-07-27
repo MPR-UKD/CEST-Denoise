@@ -60,7 +60,6 @@ def test_block_size():
 
 @pytest.mark.test_id(4)
 def test_window_size():
-
     # Test 4 - check that the function handles different window sizes correctly
     config = {"sigma": 25.0, "step1_WindowSize": 21, "step2_WindowSize": 21}
     result = bm3d(img, config, mask)
