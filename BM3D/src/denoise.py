@@ -15,7 +15,6 @@ def bm3d_CEST(
         for dyn in range(img.shape[-1]):
             img[:, :, dyn] = bm3d(img[:, :, dyn], config, mask)
     else:
-
         with pool.Pool(12) as p:
             res = p.imap_unordered(
                 run_ml,
