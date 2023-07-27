@@ -5,6 +5,7 @@ from DeepDenoise.src.res_unet import CESTResUNet
 from DeepDenoise.src.unet import CESTUnet
 import pytest
 
+
 def test_unet():
     # Initialize the model
     model = CESTUnet(input_shape=(42, 128, 128))

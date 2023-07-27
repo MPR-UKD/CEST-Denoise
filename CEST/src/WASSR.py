@@ -2,6 +2,7 @@ import numpy as np
 from CEST.src import matlab_style_functions
 from typing import Tuple
 
+
 # Water saturation shift referencing
 class WASSR:
     # Initialize the class with the maximum shift, ppm range, and initial values for the offset map and mask

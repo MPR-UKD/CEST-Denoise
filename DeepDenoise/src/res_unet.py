@@ -10,7 +10,7 @@ class CESTResUNet(pl.LightningModule):
         input_shape=(42, 128, 128),
         depth: int = 4,
         learning_rate=1e-3,
-        noise_estimation: bool = False
+        noise_estimation: bool = False,
     ):
         super().__init__()
 
@@ -24,43 +24,29 @@ class CESTResUNet(pl.LightningModule):
         in_channels = input_shape[0]
         features = 100
         self.inc = nn.Sequential(
-            ResLayer(in_channels, features),
-            ResLayer(features, features)
+            ResLayer(in_channels, features), ResLayer(features, features)
         )
         for i in range(depth):
             self.encoder.append(
                 nn.Sequential(
                     ResLayer(features, features * 2),
                     ResLayer(features * 2, features * 2),
-                    nn.MaxPool2d(2)
+                    nn.MaxPool2d(2),
                 )
             )
             features *= 2
 
         # Latent space
         self.latent_space = nn.Sequential(
-            ResLayer(features, features),
-            ResLayer(features, features)
+            ResLayer(features, features), ResLayer(features, features)
         )
         features *= 2
         # Decoder
         self.decoder = nn.ModuleList()
         for i in range(depth):
-            self.decoder.append(
-                Up(
-                    features,
-                    features // 4,
-                    True
-                )
-            )
+            self.decoder.append(Up(features, features // 4, True))
             features //= 2
-        self.decoder.append(
-            Up(
-                features,
-                features // 2,
-                False
-            )
-        )
+        self.decoder.append(Up(features, features // 2, False))
 
         self.output_layer = OutConv(int(features / 2), input_shape[0])
 

@@ -3,7 +3,6 @@ from BM3D.src.step2 import *
 
 
 def test_step2_final_estimation():
-
     basic_estimate_img = np.zeros((42, 42))
     noisy_image = np.zeros((42, 42))
     param = (8, 16, 32, 32, 10, 1.5, "cos")

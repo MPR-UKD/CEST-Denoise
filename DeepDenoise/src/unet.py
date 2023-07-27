@@ -10,7 +10,7 @@ class CESTUnet(pl.LightningModule):
         input_shape=(42, 128, 128),
         depth: int = 4,
         learning_rate=1e-3,
-        noise_estimation: bool = False
+        noise_estimation: bool = False,
     ):
         super().__init__()
 
@@ -25,9 +25,7 @@ class CESTUnet(pl.LightningModule):
         features = 100
         self.inc = DoubleConv(in_channels, features)
         for i in range(depth):
-            self.encoder.append(
-                Down(features, features * 2)
-            )
+            self.encoder.append(Down(features, features * 2))
             features *= 2
 
         # Latent space
@@ -37,14 +35,9 @@ class CESTUnet(pl.LightningModule):
         # Decoder
         self.decoder = nn.ModuleList()
         for i in range(depth):
-            self.decoder.append(Up(int(features),
-                                   int(features / 4),
-                                   True
-                                   )
-                                )
+            self.decoder.append(Up(int(features), int(features / 4), True))
             features /= 2
-        self.decoder.append(Up(int(features),
-                               int(features / 2)))
+        self.decoder.append(Up(int(features), int(features / 2)))
 
         self.output_layer = OutConv(int(features / 2), input_shape[0])
 
