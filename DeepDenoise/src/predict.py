@@ -38,9 +38,21 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # Add command line arguments
-    parser.add_argument("--checkpoint_path", type=str, required=True, help="Path to the model checkpoint")
-    parser.add_argument("--input_path", type=str, required=True, help="Path to the input Nifti file")
-    parser.add_argument("--output_path", type=str, required=True, help="Path to save the output Nifti file")
+    parser.add_argument(
+        "--checkpoint_path",
+        type=str,
+        required=True,
+        help="Path to the model checkpoint",
+    )
+    parser.add_argument(
+        "--input_path", type=str, required=True, help="Path to the input Nifti file"
+    )
+    parser.add_argument(
+        "--output_path",
+        type=str,
+        required=True,
+        help="Path to save the output Nifti file",
+    )
 
     args = parser.parse_args()
 
