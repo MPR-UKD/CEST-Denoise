@@ -15,7 +15,6 @@ def img_to_casorati_matrix(img: np.array, mask: np.array = None) -> np.array:
 
     # Iterate through all pairs of indices (i1, i2) in the image
     for i1, i2 in product(range(n), range(m)):
-
         # If the mask value at this index is 0, skip this iteration
         if mask[i2, i1] == 0:
             continue

@@ -19,11 +19,11 @@ def mtr_asym_curve(Z: np.ndarray) -> np.ndarray:
 
 class LorentzianPool:
     def __init__(
-            self,
-            name: str,
-            amplitude_bounds: tuple[float, float, float],
-            position_bounds: tuple[float, float, float],
-            width_bounds: tuple[float, float, float],
+        self,
+        name: str,
+        amplitude_bounds: tuple[float, float, float],
+        position_bounds: tuple[float, float, float],
+        width_bounds: tuple[float, float, float],
     ):
         self.name = name
         self.amplitude_bounds = amplitude_bounds
@@ -46,8 +46,8 @@ def multi_lorentzian(x, *params):
     num_pools = len(params) // 3
 
     for i in range(num_pools):
-        A, x0, gamma = params[i * 3: (i + 1) * 3]
-        y += A * gamma ** 2 / ((x - x0) ** 2 + gamma ** 2)
+        A, x0, gamma = params[i * 3 : (i + 1) * 3]
+        y += A * gamma**2 / ((x - x0) ** 2 + gamma**2)
 
     y += params[-1]
     return y
@@ -70,7 +70,9 @@ def calculate_r_squared(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return r_squared
 
 
-def calculate_adjusted_r_squared(y_true: np.ndarray, y_pred: np.ndarray, num_params: int) -> float:
+def calculate_adjusted_r_squared(
+    y_true: np.ndarray, y_pred: np.ndarray, num_params: int
+) -> float:
     """
     Calculate the adjusted coefficient of determination (adjusted R^2) for the given true and predicted values.
 
