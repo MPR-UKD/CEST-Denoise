@@ -89,7 +89,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--max_epochs",
         type=int,
-        default=1,
+        default=5,
         help="Maximum number of epochs to train for",
     )
     parser.add_argument(
@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--learning_rate", type=float, default=1e-3, help="Initial learning rate"
     )
-    parser.add_argument("--model", type=str, default="res_unet", help="Model type")
+    parser.add_argument("--model", type=str, default="unet", help="Model type")
     parser.add_argument(
         "--noise_estimation", type=bool, default=False, help="Noise Estimation"
     )

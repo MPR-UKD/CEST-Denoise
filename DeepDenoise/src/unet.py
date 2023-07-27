@@ -2,6 +2,27 @@ import torch
 import torch.nn as nn
 import pytorch_lightning as pl
 from DeepDenoise.src.layer import *
+from Metrics.src.image_quality_estimation import IQS
+
+
+def check_performance(gt_image, noisy_image, denoised_image):
+    """
+
+    Args:
+        gt_image:
+        noisy_image:
+        denoised_image:
+
+    Returns:
+
+    """
+    iqs = IQS(pixel_max=1, ref_image=gt_image.cpu().numpy())
+    return {
+        "PSNR_Noisy": iqs.psnr(noisy_image.cpu().numpy()),
+        "RMSE_Noisy": iqs.root_mean_square_error(noisy_image.cpu().numpy()),
+        "PSNR_DENOISED": iqs.psnr(denoised_image.cpu().numpy()),
+        "RMSE_DENOISED": iqs.root_mean_square_error(denoised_image.cpu().numpy()),
+    }
 
 
 class CESTUnet(pl.LightningModule):
@@ -71,14 +92,29 @@ class CESTUnet(pl.LightningModule):
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
-        self.log("loss", loss)
+        self.log("loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
+        performance = check_performance(y, x, y_hat)
         loss = self.loss_fn(y_hat, y)
-        self.log("val_loss", loss)
+        self.log("val_loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
+        self.log(
+            "Val_PSNR_noisy",
+            performance["PSNR_Noisy"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+        self.log(
+            "Val_PSNR_denoised",
+            performance["PSNR_DENOISED"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
         return loss
 
     def test_step(self, batch, batch_idx):
@@ -86,6 +122,21 @@ class CESTUnet(pl.LightningModule):
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
         self.log("test_loss", loss)
+        performance = check_performance(y, x, y_hat)
+        self.log(
+            "Test_PSNR_noisy",
+            performance["PSNR_Noisy"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+        self.log(
+            "Test_PSNR_denoised",
+            performance["PSNR_DENOISED"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
         return loss
 
     def configure_optimizers(self):
