@@ -29,7 +29,7 @@ class CESTDataModule(pl.LightningDataModule):
         batch_size: int = 1,
         workers: int = 1,
         transform: None | Callable = None,
-        noise_std: float = 0.1,
+        noise_std: float = 0.2,
     ):
         super().__init__()
         self.dir = dir

@@ -2,27 +2,7 @@ import torch
 import torch.nn as nn
 import pytorch_lightning as pl
 from DeepDenoise.src.layer import *
-from Metrics.src.image_quality_estimation import IQS
-
-
-def check_performance(gt_image, noisy_image, denoised_image):
-    """
-
-    Args:
-        gt_image:
-        noisy_image:
-        denoised_image:
-
-    Returns:
-
-    """
-    iqs = IQS(pixel_max=1, ref_image=gt_image.cpu().numpy())
-    return {
-        "PSNR_Noisy": iqs.psnr(noisy_image.cpu().numpy()),
-        "RMSE_Noisy": iqs.root_mean_square_error(noisy_image.cpu().numpy()),
-        "PSNR_DENOISED": iqs.psnr(denoised_image.cpu().numpy()),
-        "RMSE_DENOISED": iqs.root_mean_square_error(denoised_image.cpu().numpy()),
-    }
+from Metrics.src.image_quality_estimation import check_performance
 
 
 class CESTUnet(pl.LightningModule):

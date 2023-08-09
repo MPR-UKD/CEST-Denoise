@@ -1,7 +1,9 @@
-import torch
-import torch.nn as nn
 import pytorch_lightning as pl
+from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
+
 from DeepDenoise.src.layer import *
+from Metrics.src.image_quality_estimation import check_performance
 
 
 class CESTResUNet(pl.LightningModule):
@@ -78,23 +80,62 @@ class CESTResUNet(pl.LightningModule):
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
-        self.log("train_loss", loss)
+        self.log("loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
         return loss
 
     def validation_step(self, batch, batch_idx):
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
+        performance = check_performance(y, x, y_hat)
         loss = self.loss_fn(y_hat, y)
-        self.log("val_loss", loss)
+        self.log("val_loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
+        self.log(
+            "Val_PSNR_noisy",
+            performance["PSNR_Noisy"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+        self.log(
+            "Val_PSNR_denoised",
+            performance["PSNR_DENOISED"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
         return loss
 
     def test_step(self, batch, batch_idx):
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
-        self.log("val_loss", loss)
+        self.log("test_loss", loss)
+        performance = check_performance(y, x, y_hat)
+        self.log(
+            "Test_PSNR_noisy",
+            performance["PSNR_Noisy"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+        self.log(
+            "Test_PSNR_denoised",
+            performance["PSNR_DENOISED"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
         return loss
 
     def configure_optimizers(self):
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        return optimizer
+        optimizer = Adam(self.parameters(), lr=self.learning_rate)
+        scheduler = ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.1, patience=10, verbose=True
+        )
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": scheduler,
+                "monitor": "val_loss",
+            },
+        }

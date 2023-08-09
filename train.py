@@ -1,12 +1,12 @@
 import argparse
+from pathlib import Path
+
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
+
+from DeepDenoise.src.dataloader import CESTDataModule
 from DeepDenoise.src.res_unet import CESTResUNet
 from DeepDenoise.src.unet import CESTUnet
-from DeepDenoise.src.dataloader import CESTDataModule
-from pathlib import Path
-from lightning.pytorch.callbacks import RichProgressBar
-from lightning.pytorch.callbacks.progress.rich_progress import RichProgressBarTheme
 
 
 def main(args):
@@ -28,7 +28,10 @@ def main(args):
 
     # Instantiate the data module
     data_module = CESTDataModule(
-        dir=args.data_dir, batch_size=args.batch_size, workers=args.num_workers
+        dir=args.data_dir,
+        batch_size=args.batch_size,
+        workers=args.num_workers,
+        noise_std=args.sigma,
     )
 
     # Define the learning rate monitor callback
@@ -102,6 +105,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--noise_estimation", type=bool, default=False, help="Noise Estimation"
     )
+    parser.add_argument("--sigma", type=float, default=0.05)
 
     args = parser.parse_args()
 

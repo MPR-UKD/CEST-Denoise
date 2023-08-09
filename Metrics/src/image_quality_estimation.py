@@ -4,6 +4,26 @@ import numpy as np
 import math
 
 
+def check_performance(gt_image, noisy_image, denoised_image):
+    """
+
+    Args:
+        gt_image:
+        noisy_image:
+        denoised_image:
+
+    Returns:
+
+    """
+    iqs = IQS(pixel_max=1, ref_image=gt_image.cpu().numpy())
+    return {
+        "PSNR_Noisy": iqs.psnr(noisy_image.cpu().numpy()),
+        "RMSE_Noisy": iqs.root_mean_square_error(noisy_image.cpu().numpy()),
+        "PSNR_DENOISED": iqs.psnr(denoised_image.cpu().numpy()),
+        "RMSE_DENOISED": iqs.root_mean_square_error(denoised_image.cpu().numpy()),
+    }
+
+
 class IQS(ABC):
     # CEST Z-Spectra pixel_max = 1 / RGB Image 255
     def __init__(self, pixel_max: float, ref_image: np.ndarray = None):
