@@ -9,22 +9,21 @@ from DeepDenoise.src.res_unet import CESTResUNet
 from DeepDenoise.src.unet import CESTUnet
 
 
-def main(args):
+def main(args: argparse.Namespace) -> None:
+    """
+    Main function to train and test the model.
+
+    Args:
+        args (argparse.Namespace): Command line arguments.
+    """
     # Instantiate the model
-    if args.model == "unet":
-        model = CESTUnet(
-            input_shape=(42, 128, 128),
-            depth=args.depth,
-            learning_rate=args.learning_rate,
-            noise_estimation=args.noise_estimation,
-        )
-    else:
-        model = CESTResUNet(
-            input_shape=(42, 128, 128),
-            depth=args.depth,
-            learning_rate=args.learning_rate,
-            noise_estimation=args.noise_estimation,
-        )
+    model_cls = CESTUnet if args.model == "unet" else CESTResUNet
+    model = model_cls(
+        input_shape=(args.dyn, 128, 128),
+        depth=args.depth,
+        learning_rate=args.learning_rate,
+        noise_estimation=args.noise_estimation,
+    )
 
     # Instantiate the data module
     data_module = CESTDataModule(
@@ -34,10 +33,8 @@ def main(args):
         noise_std=args.sigma,
     )
 
-    # Define the learning rate monitor callback
+    # Define callbacks
     lr_monitor = LearningRateMonitor(logging_interval="step")
-
-    # Define the model checkpoint callback
     checkpoint_callback = ModelCheckpoint(
         dirpath=Path(args.checkpoint_dir) / args.model,
         filename="model-{epoch:02d}-{val_loss:.2f}",
@@ -59,53 +56,27 @@ def main(args):
         check_val_every_n_epoch=1,
     )
 
-    # Train the model
+    # Train and test the model
     trainer.fit(model, data_module)
-
-    # Test the model
     trainer.test(model, data_module.test_dataloader())
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Train and test the CEST model.")
 
     # Add command line arguments
-    parser.add_argument(
-        "--data_dir",
-        type=str,
-        default="DeepDenoise/test/test_data",
-        help="Path to data directory",
-    )
-    parser.add_argument(
-        "--checkpoint_dir",
-        type=str,
-        default="./checkpoints",
-        help="Path to checkpoint directory",
-    )
-    parser.add_argument(
-        "--batch_size", type=int, default=1, help="Batch size for training"
-    )
-    parser.add_argument(
-        "--num_workers", type=int, default=1, help="Number of workers for data loading"
-    )
+    parser.add_argument("--data_dir", type=str, default="DeepDenoise/test/test_data", help="Path to data directory")
+    parser.add_argument("--checkpoint_dir", type=str, default="./checkpoints", help="Path to checkpoint directory")
+    parser.add_argument("--batch_size", type=int, default=1, help="Batch size for training")
+    parser.add_argument("--num_workers", type=int, default=1, help="Number of workers for data loading")
     parser.add_argument("--depth", type=int, default=3, help="Depth of the model")
-    parser.add_argument(
-        "--max_epochs",
-        type=int,
-        default=5,
-        help="Maximum number of epochs to train for",
-    )
-    parser.add_argument(
-        "--gpus", type=int, default=0, help="Number of GPUs to use for training"
-    )
-    parser.add_argument(
-        "--learning_rate", type=float, default=1e-3, help="Initial learning rate"
-    )
-    parser.add_argument("--model", type=str, default="unet", help="Model type")
-    parser.add_argument(
-        "--noise_estimation", type=bool, default=False, help="Noise Estimation"
-    )
-    parser.add_argument("--sigma", type=float, default=0.05)
+    parser.add_argument("--max_epochs", type=int, default=2, help="Maximum number of epochs to train for")
+    parser.add_argument("--dyn", type=int, default=42, help="Number of offset frequencies in the Z-spectrum")
+    parser.add_argument("--gpus", type=int, default=0, help="Number of GPUs to use for training")
+    parser.add_argument("--learning_rate", type=float, default=1e-3, help="Initial learning rate")
+    parser.add_argument("--model", type=str, choices=["unet", "resunet"], default="unet", help="Model type")
+    parser.add_argument("--noise_estimation", action="store_true", help="Enable noise estimation")
+    parser.add_argument("--sigma", type=float, default=0.05, help="Standard deviation of the noise")
 
     args = parser.parse_args()
 
