@@ -1,11 +1,14 @@
 import torch
 import torch.nn as nn
 import pytorch_lightning as pl
-from DeepDenoise.src.layer import *
+from DeepDenoise.src.layer import DoubleConv, Down, Up, OutConv
 from Metrics.src.image_quality_estimation import check_performance
+from typing import Tuple, Dict
 
 
 class CESTUnet(pl.LightningModule):
+    """U-Net architecture for CEST MRI denoising."""
+
     def __init__(
         self,
         input_shape=(42, 128, 128),
@@ -13,6 +16,15 @@ class CESTUnet(pl.LightningModule):
         learning_rate=1e-3,
         noise_estimation: bool = False,
     ):
+        """
+        Initialize the CESTUnet class.
+
+        Args:
+            input_shape (Tuple[int, int, int]): Shape of the input data.
+            depth (int): Depth of the U-Net.
+            learning_rate (float): Learning rate for the optimizer.
+            noise_estimation (bool): If True, the network estimates noise.
+        """
         super().__init__()
 
         self.input_shape = input_shape
@@ -45,7 +57,8 @@ class CESTUnet(pl.LightningModule):
         # Define loss function
         self.loss_fn = nn.MSELoss()
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass of the U-Net."""
         # Move input data to the GPU
         x = x.to(self.device)
         input_img = x
@@ -68,57 +81,37 @@ class CESTUnet(pl.LightningModule):
 
         return input_img - x if self.noise_estimation else x
 
-    def training_step(self, batch, batch_idx):
+    def training_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
+        """Training step."""
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
         self.log("loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
         return loss
 
-    def validation_step(self, batch, batch_idx):
+    def validation_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
+        """Validation step."""
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         performance = check_performance(y, x, y_hat)
         loss = self.loss_fn(y_hat, y)
         self.log("val_loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
-        self.log(
-            "Val_PSNR_noisy",
-            performance["PSNR_Noisy"],
-            sync_dist=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
-        self.log(
-            "Val_PSNR_denoised",
-            performance["PSNR_DENOISED"],
-            sync_dist=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
+        self.log("Val_PSNR_noisy", performance["PSNR_Noisy"], sync_dist=True, on_epoch=True, prog_bar=True)
+        self.log("Val_PSNR_denoised", performance["PSNR_DENOISED"], sync_dist=True, on_epoch=True, prog_bar=True)
         return loss
 
-    def test_step(self, batch, batch_idx):
+    def test_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
+        """Test step."""
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
         self.log("test_loss", loss)
         performance = check_performance(y, x, y_hat)
-        self.log(
-            "Test_PSNR_noisy",
-            performance["PSNR_Noisy"],
-            sync_dist=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
-        self.log(
-            "Test_PSNR_denoised",
-            performance["PSNR_DENOISED"],
-            sync_dist=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
+        self.log("Test_PSNR_noisy", performance["PSNR_Noisy"], sync_dist=True, on_epoch=True, prog_bar=True)
+        self.log("Test_PSNR_denoised", performance["PSNR_DENOISED"], sync_dist=True, on_epoch=True, prog_bar=True)
         return loss
 
-    def configure_optimizers(self):
+    def configure_optimizers(self) -> torch.optim.Optimizer:
+        """Configure the optimizer."""
         optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
         return optimizer
