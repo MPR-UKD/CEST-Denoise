@@ -4,7 +4,9 @@ import torch.nn.functional as F
 
 
 class DoubleConv(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    """Double convolution block with BatchNorm and ReLU activation."""
+
+    def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
         self.double_conv = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
@@ -15,23 +17,27 @@ class DoubleConv(nn.Module):
             nn.ReLU(inplace=True),
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.double_conv(x)
 
 
 class Down(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    """Downsampling block with MaxPool followed by a DoubleConv."""
+
+    def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
         self.maxpool_conv = nn.Sequential(
             nn.MaxPool2d(2), DoubleConv(in_channels, out_channels)
         )
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.maxpool_conv(x)
 
 
 class Up(nn.Module):
-    def __init__(self, in_channels, out_channels, bilinear=True):
+    """Upsampling block with either bilinear upsampling or transposed convolution followed by a DoubleConv."""
+
+    def __init__(self, in_channels: int, out_channels: int, bilinear: bool = True):
         super().__init__()
 
         if bilinear:
@@ -43,7 +49,7 @@ class Up(nn.Module):
 
         self.conv = DoubleConv(in_channels, out_channels)
 
-    def forward(self, x1, x2):
+    def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
         x1 = self.up(x1)
         diffY = x2.size()[2] - x1.size()[2]
         diffX = x2.size()[3] - x1.size()[3]
@@ -54,16 +60,20 @@ class Up(nn.Module):
 
 
 class OutConv(nn.Module):
-    def __init__(self, in_channels, out_channels):
-        super(OutConv, self).__init__()
+    """Output convolution block with a 1x1 kernel size."""
+
+    def __init__(self, in_channels: int, out_channels: int):
+        super().__init__()
         self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=1)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         return self.conv(x)
 
 
 class ResLayer(nn.Module):
-    def __init__(self, in_channels, out_channels):
+    """Residual layer block with two convolutional layers and a shortcut connection."""
+
+    def __init__(self, in_channels: int, out_channels: int):
         super().__init__()
 
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
@@ -79,7 +89,7 @@ class ResLayer(nn.Module):
         )
         self.bn_shortcut = nn.BatchNorm2d(out_channels)
 
-    def forward(self, x):
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
         residual = x
 
         out = self.conv1(x)
