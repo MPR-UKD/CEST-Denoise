@@ -1,4 +1,4 @@
-from pathlib import Path
+import random
 from pathlib import Path
 from typing import List, Dict, Union
 import numpy as np
@@ -16,117 +16,106 @@ class CESTDataset(Dataset):
         self,
         root_dir: Path,
         mode: str,
-        distribution: list | None = None,
+        distribution: List[float] = None,
         noise_std: float = 0.1,
         transform=None,
+        dyn: int = None
     ):
-        """Init Class.
+        """
+        Initialize the CESTDataset class.
 
         Args:
-            root_dir (Path): The root directory that contains the .nii files.
+            root_dir (Path): The root directory containing the .nii files.
             mode (str): The mode in which to operate, either "train", "val", or "test".
-            distribution (List[float] | None, optional): The data distribution across training, validation, and testing. Defaults to [0.7, 0.2, 0.1].
-            noise_std (float, optional): The standard deviation of the noise to add. Defaults to 0.1.
-            transform (callable, optional): An optional transformation to apply to the data.
+            distribution (List[float], optional): Data distribution across training, validation, and testing. Defaults to [0.7, 0.2, 0.1].
+            noise_std (float, optional): Standard deviation of the noise to add. Defaults to 0.1.
+            transform (callable, optional): Optional transformation to apply to the data.
+            dyn (int, optional): Number of offset frequencies in the Z-spectrum.
 
         Raises:
-            ValueError: If an invalid mode is given.
-
-        Attributes:
-            mode (str): The mode in which the dataset operates.
-            root_dir (Path): The root directory containing the .nii files.
-            noiser (Noiser): The Noiser object used to add noise to the images.
-            transform (callable, optional): An optional transformation to apply to the data.
-            file_list (List[Path]): A list of paths to the .nii files.
+            ValueError: If an invalid mode is provided.
         """
+        # Set default distribution if not provided
+        distribution = distribution if distribution else [0.7, 0.2, 0.1]
 
-        # If distribution parameter is not provided, set default values
-        distribution = distribution if distribution is not None else [0.7, 0.2, 0.1]
-
-        # Initialize class variables
         self.mode = mode
         self.root_dir = root_dir
         self.noiser = Noiser(sigma=noise_std)
         self.transform = transform
+        self.dyn = dyn
 
-        # Get all nii files in root directory
-        files = [_.absolute() for _ in root_dir.glob("*.nii")]
+        # Get all .nii files in the root directory
+        files = [file.absolute() for file in root_dir.glob("*.nii")]
 
-        # Set the start and end index for the file list based on mode
+        # Determine start and end indices based on mode and distribution
         if mode == "train":
-            start = 0
-            end = int(distribution[0] * len(files))
+            start, end = 0, int(distribution[0] * len(files))
         elif mode == "val":
-            start = int(distribution[0] * len(files)) - 1
-            end = start + int(distribution[1] * len(files))
+            start, end = int(distribution[0] * len(files)), int(distribution[0] * len(files)) + int(distribution[1] * len(files))
         elif mode == "test":
-            start = (
-                int(distribution[0] * len(files))
-                + int(distribution[1] * len(files))
-                - 1
-            )
-            end = -1
+            start, end = int(distribution[0] * len(files)) + int(distribution[1] * len(files)), len(files)
         else:
-            # Raise an error if mode is invalid
             raise ValueError(f"Invalid mode: {mode}")
 
-        # Set the file list based on start and end indices
         self.file_list = files[start:end]
 
     def __len__(self) -> int:
-        """Get the length of the dataset.
-
-        Returns:
-            int: The number of items in the dataset.
-        """
+        """Return the number of items in the dataset."""
         return len(self.file_list)
 
     def __getitem__(self, idx: Union[int, torch.Tensor]) -> Dict[str, torch.Tensor]:
-        """Get an item from the dataset by index.
+        """
+        Retrieve an item from the dataset by index.
 
         Args:
-            idx (int | torch.Tensor): The index of the item to get.
+            idx (int | torch.Tensor): Index of the desired item.
 
         Returns:
-            dict[str, torch.Tensor]: The item, consisting of the ground truth and noisy images.
+            dict[str, torch.Tensor]: Ground truth and noisy images.
         """
-        # If idx is a tensor, convert it to a Python integer
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
-        # Load the image at the given index
         img_path = self.file_list[idx]
-        img = load_z(img_path)
+        img = load_z(img_path, self.dyn)
 
-        # Add noise to the image using the Noiser class
         noisy_img = self.noiser.add_noise(img.copy())
 
-        # Transpose the image arrays to match PyTorch's convention
+        # Transpose to match PyTorch's convention (C, H, W)
         sample = {
             "ground_truth": img.transpose(2, 3, 0, 1).squeeze(),
             "noisy": noisy_img.transpose(2, 3, 0, 1).squeeze(),
         }
 
-        # Apply transform (if provided)
         if self.transform:
             sample = self.transform(sample)
 
-        # Convert numpy arrays to PyTorch tensors
         sample["ground_truth"] = torch.tensor(sample["ground_truth"]).float()
         sample["noisy"] = torch.tensor(sample["noisy"]).float()
 
         return sample
 
 
-def load_z(img_path: Path) -> np.ndarray:
-    """Load a CEST file and normalize.
+def load_z(img_path: Path, dyn: int = None) -> np.ndarray:
+    """
+    Load a CEST file and normalize it.
 
     Args:
-        img_path (Path): The path to the .nii file.
+        img_path (Path): Path to the .nii file.
+        dyn (int, optional): Number of offset frequencies in the Z-spectrum.
 
     Returns:
-        np.ndarray: The normalized image data from the .nii file.
+        np.ndarray: Normalized image data.
     """
     img_nii = nib.load(img_path)
-    img = img_nii.get_fdata() / 4016
+    img = img_nii.get_fdata()
+
+    # Normalize the image
+    img /= 4016
+
+    # Crop the Z-spectrum if dyn is provided
+    if dyn:
+        first_offset = random.randint(0, img.shape[-1] - dyn)
+        img = img[:, :, :, first_offset:first_offset+dyn]
+
     return img
