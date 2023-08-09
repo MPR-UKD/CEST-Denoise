@@ -81,7 +81,9 @@ class CESTUnet(pl.LightningModule):
 
         return input_img - x if self.noise_estimation else x
 
-    def training_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
+    def training_step(
+        self, batch: Dict[str, torch.Tensor], batch_idx: int
+    ) -> torch.Tensor:
         """Training step."""
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
@@ -89,15 +91,29 @@ class CESTUnet(pl.LightningModule):
         self.log("loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
         return loss
 
-    def validation_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
+    def validation_step(
+        self, batch: Dict[str, torch.Tensor], batch_idx: int
+    ) -> torch.Tensor:
         """Validation step."""
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         performance = check_performance(y, x, y_hat)
         loss = self.loss_fn(y_hat, y)
         self.log("val_loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
-        self.log("Val_PSNR_noisy", performance["PSNR_Noisy"], sync_dist=True, on_epoch=True, prog_bar=True)
-        self.log("Val_PSNR_denoised", performance["PSNR_DENOISED"], sync_dist=True, on_epoch=True, prog_bar=True)
+        self.log(
+            "Val_PSNR_noisy",
+            performance["PSNR_Noisy"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+        self.log(
+            "Val_PSNR_denoised",
+            performance["PSNR_DENOISED"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
         return loss
 
     def test_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
@@ -107,8 +123,20 @@ class CESTUnet(pl.LightningModule):
         loss = self.loss_fn(y_hat, y)
         self.log("test_loss", loss)
         performance = check_performance(y, x, y_hat)
-        self.log("Test_PSNR_noisy", performance["PSNR_Noisy"], sync_dist=True, on_epoch=True, prog_bar=True)
-        self.log("Test_PSNR_denoised", performance["PSNR_DENOISED"], sync_dist=True, on_epoch=True, prog_bar=True)
+        self.log(
+            "Test_PSNR_noisy",
+            performance["PSNR_Noisy"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
+        self.log(
+            "Test_PSNR_denoised",
+            performance["PSNR_DENOISED"],
+            sync_dist=True,
+            on_epoch=True,
+            prog_bar=True,
+        )
         return loss
 
     def configure_optimizers(self) -> torch.optim.Optimizer:

@@ -19,7 +19,7 @@ class CESTDataset(Dataset):
         distribution: List[float] = None,
         noise_std: float = 0.1,
         transform=None,
-        dyn: int = None
+        dyn: int = None,
     ):
         """
         Initialize the CESTDataset class.
@@ -51,9 +51,13 @@ class CESTDataset(Dataset):
         if mode == "train":
             start, end = 0, int(distribution[0] * len(files))
         elif mode == "val":
-            start, end = int(distribution[0] * len(files)), int(distribution[0] * len(files)) + int(distribution[1] * len(files))
+            start, end = int(distribution[0] * len(files)), int(
+                distribution[0] * len(files)
+            ) + int(distribution[1] * len(files))
         elif mode == "test":
-            start, end = int(distribution[0] * len(files)) + int(distribution[1] * len(files)), len(files)
+            start, end = int(distribution[0] * len(files)) + int(
+                distribution[1] * len(files)
+            ), len(files)
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
@@ -116,6 +120,6 @@ def load_z(img_path: Path, dyn: int = None) -> np.ndarray:
     # Crop the Z-spectrum if dyn is provided
     if dyn:
         first_offset = random.randint(0, img.shape[-1] - dyn)
-        img = img[:, :, :, first_offset:first_offset+dyn]
+        img = img[:, :, :, first_offset : first_offset + dyn]
 
     return img
