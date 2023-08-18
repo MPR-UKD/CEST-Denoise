@@ -1,7 +1,7 @@
 import argparse
-
+import onnx
+import onnxruntime as ort
 from nibabel import load, save, Nifti1Image
-
 from BM3D.src.denoise import bm3d, bm3d_CEST
 from NLM.src.denoise import nlm, nlm_CEST
 from PCA.src.denoise import pca
@@ -9,7 +9,23 @@ import yaml
 import numpy as np
 
 
-def denoise_nifti(input_path, output_path, algorithm, mask_path=None, config=None):
+def denoise_onnx(input_image, model_path):
+    """Denoise using an ONNX model."""
+    # Load the ONNX model
+    ort_session = ort.InferenceSession(model_path)
+
+    # Prepare the input data
+    input_data = np.expand_dims(input_image, axis=0)
+    input_name = ort_session.get_inputs()[0].name
+
+    # Run the model
+    denoised_image = ort_session.run(None, {input_name: input_data})[0]
+    return denoised_image.squeeze()
+
+
+def denoise_nifti(
+    input_path, output_path, algorithm, mask_path=None, config=None, onnx_model=None
+):
     # Load the input image and mask (if provided)
     input_image = load(input_path).get_fdata()
     if mask_path:
@@ -31,7 +47,11 @@ def denoise_nifti(input_path, output_path, algorithm, mask_path=None, config=Non
             config = yaml.safe_load(f)
 
     # Denoise the image using the specified algorithm
-    if algorithm == "BM3D":
+    if algorithm == "ONNX":
+        if not onnx_model:
+            raise ValueError("ONNX model path must be provided for ONNX denoising.")
+        denoised_image = denoise_onnx(input_image, onnx_model)
+    elif algorithm == "BM3D":
         if config.mode == "image":
             denoised_image = bm3d(input_image, config=config, mask=mask)
         elif config.mode == "cest":
@@ -66,7 +86,7 @@ def denoise_nifti(input_path, output_path, algorithm, mask_path=None, config=Non
 
 # Parse the command-line arguments
 parser = argparse.ArgumentParser(
-    description="Denoise a NIFTI image using BM3D, NLM, or PCA"
+    description="Denoise a NIFTI image using BM3D, NLM, PCA, or ONNX"
 )
 parser.add_argument("input_path", type=str, help="Path to the input NIFTI image")
 parser.add_argument(
@@ -75,7 +95,7 @@ parser.add_argument(
 parser.add_argument(
     "algorithm",
     type=str,
-    choices=["BM3D", "NLM", "PCA"],
+    choices=["BM3D", "NLM", "PCA", "ONNX"],
     help="Denoising algorithm to use (default: NLM)",
     default="NLM",
 )
@@ -86,6 +106,12 @@ parser.add_argument(
     help="path to a yaml file with configuration parameters for the denoising algorithm. If no path "
     "is specified, the default config is used.",
 )
+parser.add_argument(
+    "--onnx_model",
+    type=str,
+    help="Path to the ONNX model for denoising (required if algorithm is ONNX)",
+)
+
 args = parser.parse_args()
 
 # Denoise the NIFTI image
@@ -95,4 +121,5 @@ denoise_nifti(
     args.algorithm,
     mask_path=args.mask_path,
     config=args.config,
+    onnx_model=args.onnx_model,
 )
