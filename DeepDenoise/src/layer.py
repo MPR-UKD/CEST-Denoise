@@ -70,7 +70,7 @@ class OutConv(nn.Module):
         return self.conv(x)
 
 
-class ResLayer(nn.Module):
+class ResDown(nn.Module):
     """Residual layer block with two convolutional layers and a shortcut connection."""
 
     def __init__(self, in_channels: int, out_channels: int):
@@ -105,5 +105,50 @@ class ResLayer(nn.Module):
 
         out += residual
         out = self.relu2(out)
+
+        return out
+
+
+class ResUp(nn.Module):
+    """Residual upsampling block with either bilinear upsampling or transposed convolution followed by a DoubleConv and a residual connection."""
+
+    def __init__(self, in_channels: int, out_channels: int, bilinear: bool = True):
+        super().__init__()
+
+        if bilinear:
+            self.up = nn.Upsample(scale_factor=2, mode="bilinear", align_corners=True)
+        else:
+            self.up = nn.ConvTranspose2d(
+                in_channels // 2, in_channels // 2, kernel_size=2, stride=2
+            )
+
+        self.conv = DoubleConv(in_channels, out_channels)
+
+        # Residual connection
+        self.shortcut = nn.Sequential(
+            nn.Conv2d(
+                in_channels,
+                out_channels,
+                kernel_size=1,
+                stride=1,
+                padding=0,
+                bias=False,
+            ),
+            nn.BatchNorm2d(out_channels),
+        )
+
+    def forward(self, x1: torch.Tensor, x2: torch.Tensor) -> torch.Tensor:
+        x1 = self.up(x1)
+        diffY = x2.size()[2] - x1.size()[2]
+        diffX = x2.size()[3] - x1.size()[3]
+
+        x1 = F.pad(x1, [diffX // 2, diffX - diffX // 2, diffY // 2, diffY - diffY // 2])
+        x = torch.cat([x2, x1], dim=1)
+
+        # Residual connection
+        residual = self.shortcut(x)
+
+        out = self.conv(x)
+        out = out + residual
 
         return out

@@ -26,13 +26,13 @@ class CESTResUNet(pl.LightningModule):
         in_channels = input_shape[0]
         features = 100
         self.inc = nn.Sequential(
-            ResLayer(in_channels, features), ResLayer(features, features)
+            ResDown(in_channels, features), ResDown(features, features)
         )
         for i in range(depth):
             self.encoder.append(
                 nn.Sequential(
-                    ResLayer(features, features * 2),
-                    ResLayer(features * 2, features * 2),
+                    ResDown(features, features * 2),
+                    ResDown(features * 2, features * 2),
                     nn.MaxPool2d(2),
                 )
             )
@@ -40,15 +40,15 @@ class CESTResUNet(pl.LightningModule):
 
         # Latent space
         self.latent_space = nn.Sequential(
-            ResLayer(features, features), ResLayer(features, features)
+            ResDown(features, features), ResDown(features, features)
         )
         features *= 2
         # Decoder
         self.decoder = nn.ModuleList()
         for i in range(depth):
-            self.decoder.append(Up(features, features // 4, True))
+            self.decoder.append(ResUp(features, features // 4, True))
             features //= 2
-        self.decoder.append(Up(features, features // 2, False))
+        self.decoder.append(ResUp(features, features // 2, False))
 
         self.output_layer = OutConv(int(features / 2), input_shape[0])
 
@@ -56,9 +56,12 @@ class CESTResUNet(pl.LightningModule):
         self.loss_fn = nn.MSELoss()
 
     def forward(self, x):
+        # Move input data to the GPU
+        x = x.to(self.device)
+        input_img = x
+
         # Encoder
         x = self.inc(x)
-        input_img = x
 
         encoding_outputs = [x]
         for enc in self.encoder:
@@ -130,7 +133,7 @@ class CESTResUNet(pl.LightningModule):
     def configure_optimizers(self):
         optimizer = Adam(self.parameters(), lr=self.learning_rate)
         scheduler = ReduceLROnPlateau(
-            optimizer, mode="min", factor=0.1, patience=10, verbose=True
+            optimizer, mode="min", factor=0.1, patience=2, verbose=True
         )
         return {
             "optimizer": optimizer,
