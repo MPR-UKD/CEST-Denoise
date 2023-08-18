@@ -4,6 +4,8 @@ import pytorch_lightning as pl
 from DeepDenoise.src.layer import DoubleConv, Down, Up, OutConv
 from Metrics.src.image_quality_estimation import check_performance
 from typing import Tuple, Dict
+from torch.optim import Adam
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 
 
 class CESTUnet(pl.LightningModule):
@@ -139,7 +141,15 @@ class CESTUnet(pl.LightningModule):
         )
         return loss
 
-    def configure_optimizers(self) -> torch.optim.Optimizer:
-        """Configure the optimizer."""
-        optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
-        return optimizer
+    def configure_optimizers(self):
+        optimizer = Adam(self.parameters(), lr=self.learning_rate)
+        scheduler = ReduceLROnPlateau(
+            optimizer, mode="min", factor=0.1, patience=2, verbose=True
+        )
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": scheduler,
+                "monitor": "val_loss",
+            },
+        }
