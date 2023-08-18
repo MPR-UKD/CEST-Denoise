@@ -12,6 +12,7 @@ def get_dataset(
     noise_std: float,
     transform: Optional[Callable],
     dyn: int,
+    variable_sigma: bool = False,
 ) -> CESTDataset:
     """
     Create and return a CESTDataset.
@@ -34,6 +35,7 @@ def get_dataset(
         noise_std=noise_std,
         transform=transform,
         dyn=dyn,
+        variable_sigma=variable_sigma,
     )
 
 
@@ -63,7 +65,7 @@ class CESTDataModule(pl.LightningDataModule):
         super().__init__()
         self.dir = dir
         self.train_dataset = get_dataset(
-            dir, "train", distribution, noise_std, transform, dyn
+            dir, "train", distribution, noise_std + 0.05, transform, dyn, True
         )
         self.val_dataset = get_dataset(
             dir, "val", distribution, noise_std, transform, dyn

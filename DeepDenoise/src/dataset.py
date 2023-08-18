@@ -5,7 +5,7 @@ import numpy as np
 import nibabel as nib
 import torch
 from torch.utils.data import Dataset
-
+import random
 from Transform.src import Noiser
 
 
@@ -20,6 +20,7 @@ class CESTDataset(Dataset):
         noise_std: float = 0.1,
         transform=None,
         dyn: int = None,
+        variable_sigma: bool = False,
     ):
         """
         Initialize the CESTDataset class.
@@ -43,6 +44,8 @@ class CESTDataset(Dataset):
         self.noiser = Noiser(sigma=noise_std)
         self.transform = transform
         self.dyn = dyn
+        self.sigma = noise_std
+        self.variable_sigma = variable_sigma
 
         # Get all .nii files in the root directory
         files = [file.absolute() for file in root_dir.glob("*.nii")]
@@ -83,7 +86,10 @@ class CESTDataset(Dataset):
         img_path = self.file_list[idx]
         img = load_z(img_path, self.dyn)
 
-        noisy_img = self.noiser.add_noise(img.copy())
+        noisy_img = self.noiser.add_noise(
+            img.copy(),
+            sigma=random.uniform(0, self.sigma) if self.variable_sigma else None,
+        )
 
         # Transpose to match PyTorch's convention (C, H, W)
         sample = {
