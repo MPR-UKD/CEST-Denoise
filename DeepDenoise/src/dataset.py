@@ -121,7 +121,8 @@ def load_z(img_path: Path, dyn: int = None) -> np.ndarray:
     img = img_nii.get_fdata()
 
     # Normalize the image
-    img /= 4016
+    if img.max() > 2:
+        img /= 4016
 
     # Crop the Z-spectrum if dyn is provided
     if dyn:
