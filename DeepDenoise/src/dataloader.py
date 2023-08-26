@@ -68,7 +68,7 @@ class CESTDataModule(pl.LightningDataModule):
             dir, "train", distribution, noise_std + 0.05, transform, dyn, True
         )
         self.val_dataset = get_dataset(
-            dir, "val", distribution, noise_std, transform, dyn
+            dir, "val", distribution, noise_std, transform, dyn, True
         )
         self.test_dataset = get_dataset(
             dir, "test", distribution, noise_std, transform, dyn
