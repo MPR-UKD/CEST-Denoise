@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the content of the local src directory to the working directory in the Docker image
 COPY . /app
+RUN rm -r /app/.venv
+RUN rm -r /app/checkpoints
 
+RUN chmod 755 /tmp
 # This makes sure Python finds your custom modules
 ENV PYTHONPATH "${PYTHONPATH}:/app"
