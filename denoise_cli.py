@@ -1,5 +1,4 @@
 import argparse
-import onnx
 import onnxruntime as ort
 from nibabel import load, save, Nifti1Image
 from BM3D.src.denoise import bm3d, bm3d_CEST
@@ -7,7 +6,11 @@ from NLM.src.denoise import nlm, nlm_CEST
 from PCA.src.denoise import pca
 import yaml
 import numpy as np
+from pathlib import Path
+import logging
 
+# Initialize the logger
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def denoise_onnx(input_image, model_path):
     """Denoise using an ONNX model."""
@@ -15,11 +18,13 @@ def denoise_onnx(input_image, model_path):
     ort_session = ort.InferenceSession(model_path)
 
     # Prepare the input data
-    input_data = np.expand_dims(input_image, axis=0)
+    input_data = np.expand_dims(input_image.squeeze(), axis=0)
     input_name = ort_session.get_inputs()[0].name
 
     # Run the model
-    denoised_image = ort_session.run(None, {input_name: input_data})[0]
+    denoised_image = ort_session.run(None, {input_name: input_data.astype("float32")})[
+        0
+    ]
     return denoised_image.squeeze()
 
 
@@ -50,38 +55,66 @@ def denoise_nifti(
     if algorithm == "ONNX":
         if not onnx_model:
             raise ValueError("ONNX model path must be provided for ONNX denoising.")
+        if not Path(onnx_model).exists():
+            raise ValueError("ONNX path doesn't exist!")
         denoised_image = denoise_onnx(input_image, onnx_model)
     elif algorithm == "BM3D":
-        if config.mode == "image":
+        if config["mode"] == "image":
             denoised_image = bm3d(input_image, config=config, mask=mask)
-        elif config.mode == "cest":
+        elif config["mode"] == "CEST":
             denoised_image = bm3d_CEST(input_image, config=config, mask=mask)
         else:
             raise ValueError
     elif algorithm == "NLM":
-        if config.mode == "image":
+        if config["mode"] == "image":
             denoised_image = nlm(
                 input_image,
                 big_window_size=config.big_window_size,
                 small_window_size=config.small_window_size,
             )
-        elif config.mode == "cest":
-            denoised_image = nlm_CEST(
-                input_image,
-                big_window_size=config.big_window_size,
-                small_window_size=config.small_window_size,
-            )
+        elif config["mode"] == "CEST":
+            if len(input_image.shape) == 4:
+                denoised_image = nlm_CEST(
+                    input_image[:, :, 0, :],
+                    big_window_size=config["big_window_size"],
+                    small_window_size=config["small_window_size"],
+                ).reshape(input_image.shape)
+
+            else:
+                denoised_image = nlm_CEST(
+                    input_image,
+                    big_window_size=config["big_window_size"],
+                    small_window_size=config["small_window_size"],
+                )
         else:
             raise ValueError
     elif algorithm == "PCA":
-        if config.mode == "cest":
-            denoised_image = pca(input_image, criteria=config.criteria, mask=mask)
+        if config["mode"] == "CEST":
+            if len(input_image.shape) == 4:
+                denoised_image = pca(
+                    input_image[:, :, 0, :], criteria=config["criteria"], mask=mask
+                ).reshape(input_image.shape)
+
+            else:
+                denoised_image = pca(
+                    input_image[:, :, :], criteria=config["criteria"], mask=mask
+                )
         else:
             raise ValueError
 
     # Save the denoised image as a NIFTI file
     denoised_image = Nifti1Image(denoised_image, affine=np.eye(4))
-    save(denoised_image, output_path)
+
+    try:
+        save(denoised_image, output_path)
+        logging.info(f"Saved denoised image to {output_path}")
+    except Exception as e:
+        logging.error(f"Error while saving the denoised image: {e}")
+
+    # Check if the file exists
+    if not Path(output_path).exists():
+        logging.warning(f"File {output_path} not found after saving. Retrying...")
+        save(denoised_image, output_path)
 
 
 # Parse the command-line arguments
