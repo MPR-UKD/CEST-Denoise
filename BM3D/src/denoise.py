@@ -13,7 +13,10 @@ def bm3d_CEST(
     img = (img * 255).astype("int16")
     if not multi_processing:
         for dyn in range(img.shape[-1]):
-            img[:, :, dyn] = bm3d(img[:, :, dyn], config, mask)
+            if len(img.shape) == 3:
+                img[:, :, dyn] = bm3d(img[:, :, dyn], config, mask)
+            elif len(img.shape) == 4:
+                img[:, :, 0, dyn] = bm3d(img[:, :, 0, dyn], config, mask)
     else:
         with pool.Pool(12) as p:
             res = p.imap_unordered(
