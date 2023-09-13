@@ -1,7 +1,9 @@
+from multiprocessing import pool
+
 import numpy as np
+
 from .step1 import step1_basic_estimation
 from .step2 import step2_final_estimation
-from multiprocessing import pool
 
 
 def bm3d_CEST(
@@ -18,7 +20,7 @@ def bm3d_CEST(
             elif len(img.shape) == 4:
                 img[:, :, 0, dyn] = bm3d(img[:, :, 0, dyn], config, mask)
     else:
-        with pool.Pool(12) as p:
+        with pool.Pool(42) as p:
             res = p.imap_unordered(
                 run_ml,
                 [(img[:, :, dyn], mask, config, dyn) for dyn in range(img.shape[-1])],
