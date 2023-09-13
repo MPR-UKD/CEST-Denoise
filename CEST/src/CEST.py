@@ -1,8 +1,8 @@
 import numpy as np
 
+from CEST.src.WASSR import WASSR
 # Import the cest_correction and WASSR functions from the CEST package
 from CEST.src.cest_correction import cest_correction
-from CEST.src.WASSR import WASSR
 
 
 class CEST:
@@ -43,6 +43,7 @@ class CEST:
             mask=self.mask,  # mask for the CEST data
             hStep=self.config["itp_step"],  # step size to use for interpolation
         )
+        b = 2
 
     def __cest_correction(self):
         """Perform CEST correction on the data."""

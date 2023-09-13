@@ -1,6 +1,8 @@
-import numpy as np
-from CEST.src import matlab_style_functions
 from typing import Tuple
+
+import numpy as np
+
+from CEST.src import matlab_style_functions
 
 
 # Water saturation shift referencing
@@ -12,7 +14,7 @@ class WASSR:
         self.offset_map = None
 
     def calculate(
-        self, wassr: np.ndarray, mask: np.ndarray, hStep: float
+            self, wassr: np.ndarray, mask: np.ndarray, hStep: float
     ) -> Tuple[np.ndarray, np.ndarray]:
         # Get the shape of the WASSR data
         (rows, colums, dyn) = wassr.shape
@@ -37,15 +39,15 @@ class WASSR:
 
 # Calculate the offset for a given set of ppm values and corresponding intensities
 def calc_offset(
-    ppms: np.ndarray,
-    values: np.ndarray,
-    max_shift: float,
-    hStep: float,
-    max_offset: float,
+        ppms: np.ndarray,
+        values: np.ndarray,
+        max_shift: float,
+        hStep: float,
+        max_offset: float,
 ) -> float:
     # If the ppm value with the minimum intensity is greater than the maximum shift, return -100
     if abs(ppms[np.argmin(values)]) > max_shift:
-        return -100
+        pass  # return -100
     dppm = max_shift
     x_start = np.min(ppms)
     x_end = np.max(ppms)
@@ -87,18 +89,18 @@ def calc_offset(
     )
     # OF = msa2(x_interp_neu, y_interp_neu, x_interp_mirror, y_interp, self.maxShift, self.maxOffset, self.hStep)
     if abs(OF) > max_shift:
-        return -100
+        return 0
     return OF
 
 
 def msa(
-    maxShift: float,
-    maxOffset: float,
-    hStep: float,
-    xWerte: np.ndarray,
-    yWerte: np.ndarray,
-    x_interp_mirror: np.ndarray,
-    y_interp: np.ndarray,
+        maxShift: float,
+        maxOffset: float,
+        hStep: float,
+        xWerte: np.ndarray,
+        yWerte: np.ndarray,
+        x_interp_mirror: np.ndarray,
+        y_interp: np.ndarray,
 ) -> float:
     n_points = len(xWerte)
     minind = np.argmin(yWerte)
@@ -132,7 +134,7 @@ def msa(
             Ywert_verschobenmirror[j] = y_interp[index]
 
         MSE_Vektor = (Ywert_verschobenmirror - yWerte) * (
-            Ywert_verschobenmirror - yWerte
+                Ywert_verschobenmirror - yWerte
         )
         MSCF[i] = MSE_Vektor.sum()
 

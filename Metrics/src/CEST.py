@@ -1,5 +1,6 @@
 import numpy as np
 from scipy.optimize import curve_fit
+
 from Metrics.src.utils import mtr_asym_curve, LorentzianPool, multi_lorentzian
 
 
@@ -20,7 +21,7 @@ def mtr_asym(
       - MTR asymmetry curve, with shape (num_rows, num_cols, num_dynamics)
       - MTR asymmetry image, with shape (num_rows, num_cols)
     """
-    ppm = np.linspace(-ppm, 0, round((Z.shape[2] / 2) + 0.0001))
+    ppm = abs(np.linspace(-ppm, 0, round((Z.shape[2] / 2) + 0.0001)))[::-1]
     idx1 = np.argmin(abs(ppm - mtr_asym_ppm[0]))
     idx2 = np.argmin(abs(ppm - mtr_asym_ppm[1]))
     if idx1 > idx2:
