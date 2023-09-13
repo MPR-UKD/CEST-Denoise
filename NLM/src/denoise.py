@@ -1,6 +1,7 @@
+from multiprocessing import pool
+
 import numpy as np
 from numba import jit
-from multiprocessing import pool
 
 
 def nlm_CEST(
@@ -39,16 +40,20 @@ def run_ml(args):
     return nlm(img, big_window_size, small_window_size), dyn
 
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def nlm(image, big_window_size, small_window_size):
+    # Ensure that both window sizes are odd numbers
+    if big_window_size % 2 == 0:
+        big_window_size += 1
+    if small_window_size % 2 == 0:
+        small_window_size += 1
+
     pad_width, search_width = big_window_size // 2, small_window_size // 2
 
     # create padded image
-    # Hint: The border consists only of zeros, so the ROI should not be on the border.
-    # TODO: Interpolate zero-borders to improve performance
     padded_image = pad_image(image, big_window_size, pad_width)
 
-    # For each pixel in the actual image, find a area around the pixel that needs to be compared
+    # For each pixel in the actual image, find an area around the pixel that needs to be compared
     for image_x in range(pad_width, pad_width + image.shape[1]):
         for image_y in range(pad_width, pad_width + image.shape[0]):
             org_img_x_pixel = image_x - pad_width
@@ -62,12 +67,12 @@ def nlm(image, big_window_size, small_window_size):
 
             for small_window_x in range(
                 org_img_x_pixel,
-                org_img_x_pixel + big_window_size - small_window_size,
+                org_img_x_pixel + big_window_size - small_window_size + 1,
                 1,
             ):
                 for small_window_y in range(
                     org_img_y_pixel,
-                    org_img_y_pixel + big_window_size - small_window_size,
+                    org_img_y_pixel + big_window_size - small_window_size + 1,
                     1,
                 ):
                     # find the small box
@@ -88,6 +93,7 @@ def nlm(image, big_window_size, small_window_size):
             image[org_img_y_pixel, org_img_x_pixel] = new_pixel_value
 
     return image
+
 
 
 @jit(nopython=True)
@@ -111,4 +117,4 @@ def get_comparison_neighborhood(padded_image, x, y, search_width):
 
 @jit(nopython=True)
 def get_small_neighborhood(padded_image, x, y, small_window_size):
-    return padded_image[y : y + small_window_size + 1, x : x + small_window_size + 1]
+    return padded_image[y : y + small_window_size, x : x + small_window_size]
