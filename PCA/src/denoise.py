@@ -1,8 +1,8 @@
-import numpy as np
-from .utils import *
-from .criteria import *
 import itertools
 from typing import Tuple
+
+from .criteria import *
+from .utils import *
 
 
 def pca(
@@ -13,22 +13,24 @@ def pca(
     :param mask: 2D binary mask (x,y)
     :return:
     """
-
-    """ Step 1: Create column-wise mean-centered casorati_matrix C_tilde """
-    C_tilde, Z_mean = step1(img, mask)
-    """ Step 2: Principal component analysis - calc eigvals and eigvecs"""
-    eigvals, eigvecs = step2(C_tilde)
-    """ Step 3: Determine optimal number of components k """
-    if type(criteria) == str:
-        k = step3(eigvals, C_tilde, criteria)
-    else:
-        k = criteria
-    print(k)
-    """Step 4: Projection onto remaining components"""
-    C_tilde = step4(C_tilde, Z_mean, eigvecs, k)
-    """Step 5: Reform back to image"""
-    img = step5(C_tilde, img, mask)
-    return img
+    try:
+        """Step 1: Create column-wise mean-centered casorati_matrix C_tilde"""
+        C_tilde, Z_mean = step1(img, mask)
+        """ Step 2: Principal component analysis - calc eigvals and eigvecs"""
+        eigvals, eigvecs = step2(C_tilde)
+        """ Step 3: Determine optimal number of components k """
+        if type(criteria) == str:
+            k = step3(eigvals, C_tilde, criteria)
+        else:
+            k = criteria
+        print(k)
+        """Step 4: Projection onto remaining components"""
+        C_tilde = step4(C_tilde, Z_mean, eigvecs, k)
+        """Step 5: Reform back to image"""
+        img = step5(C_tilde, img, mask)
+        return img
+    except:
+        return img
 
 
 def step1(img: np.ndarray, mask: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
