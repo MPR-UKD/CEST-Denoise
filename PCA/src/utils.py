@@ -4,7 +4,9 @@ from typing import Tuple, Optional
 import numpy as np
 
 
-def img_to_casorati_matrix(img: np.ndarray, mask: Optional[np.ndarray] = None) -> np.ndarray:
+def img_to_casorati_matrix(
+    img: np.ndarray, mask: Optional[np.ndarray] = None
+) -> np.ndarray:
     """
     Converts a given 2D image to a Casorati matrix.
 
@@ -19,7 +21,9 @@ def img_to_casorati_matrix(img: np.ndarray, mask: Optional[np.ndarray] = None) -
     if mask is None:
         mask = np.ones((n, m))
 
-    casorati_matrix = [img[i2, i1, :] for i1, i2 in product(range(n), range(m)) if mask[i2, i1] != 0]
+    casorati_matrix = [
+        img[i2, i1, :] for i1, i2 in product(range(n), range(m)) if mask[i2, i1] != 0
+    ]
 
     return np.array(casorati_matrix)
 

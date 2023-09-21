@@ -43,7 +43,9 @@ def test_get_comparison_neighborhood():
 
 
 def test_get_small_neighborhood():
-    padded_image = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]])
+    padded_image = np.array(
+        [[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]]
+    )
     small_neighborhood = get_small_neighborhood(padded_image, 0, 0, 3)
     expected_small_neighborhood = np.array([[1, 2, 3], [5, 6, 7], [9, 10, 11]])
     np.testing.assert_equal(small_neighborhood, expected_small_neighborhood)

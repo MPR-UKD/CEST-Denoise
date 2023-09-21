@@ -20,7 +20,7 @@ def malinowski_criteria(eigenvalues: np.ndarray, C_tilde_shape: Tuple[int, int])
     RE = np.zeros(n - 1)
 
     for k in range(n - 1):
-        RE[k] = np.sqrt(np.sum(eigenvalues[k + 1:]) / (m * (n - k)))
+        RE[k] = np.sqrt(np.sum(eigenvalues[k + 1 :]) / (m * (n - k)))
 
     k_opt = np.argmin([RE[k] / (m * (n - k) ** 2) for k in range(n - 1)])
     return int(k_opt)
@@ -51,8 +51,8 @@ def nelson_criteria(eigvals: np.ndarray, C_tilde_shape: Tuple[int, int]) -> int:
 
         numerator = (C_tilde_shape[1] - k) * eigvals_sum_l - l_sum * eigvals_sum
         denominator = np.sqrt(
-            ((C_tilde_shape[1] - k) * l_squared - l_sum ** 2)
-        ) * np.sqrt(((C_tilde_shape[1] - k) * eigvals_sum_squared - eigvals_sum ** 2))
+            ((C_tilde_shape[1] - k) * l_squared - l_sum**2)
+        ) * np.sqrt(((C_tilde_shape[1] - k) * eigvals_sum_squared - eigvals_sum**2))
 
         if denominator != 0:
             r_squared = (numerator / denominator) ** 2
@@ -81,6 +81,6 @@ def median_criteria(eigvals: np.ndarray) -> int:
     """
     median = np.median(eigvals)
     eigvals_t = eigvals[eigvals < 2 * median]
-    beta2 = 1.29 ** 2
+    beta2 = 1.29**2
     k_med = eigvals[eigvals > beta2 * np.median(eigvals_t)].shape[0]
     return k_med

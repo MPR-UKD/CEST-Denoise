@@ -7,7 +7,9 @@ from .criteria import *
 from .utils import *
 
 
-def pca(img: np.ndarray, criteria: Union[str, int], mask: Optional[np.ndarray] = None) -> np.ndarray:
+def pca(
+    img: np.ndarray, criteria: Union[str, int], mask: Optional[np.ndarray] = None
+) -> np.ndarray:
     """
     Perform Principal Component Analysis (PCA) for denoising CEST images.
 
@@ -96,10 +98,14 @@ def step3(eigvals: np.ndarray, C_tilde: np.ndarray, criteria: str) -> int:
     elif criteria == "median":
         return median_criteria(eigvals)
     else:
-        raise ValueError(f'Invalid criteria: {criteria}. Supported criteria are "malinowski", "nelson", and "median".')
+        raise ValueError(
+            f'Invalid criteria: {criteria}. Supported criteria are "malinowski", "nelson", and "median".'
+        )
 
 
-def step4(C_tilde: np.ndarray, Z_mean: np.ndarray, eigvecs: np.ndarray, k: int) -> np.ndarray:
+def step4(
+    C_tilde: np.ndarray, Z_mean: np.ndarray, eigvecs: np.ndarray, k: int
+) -> np.ndarray:
     """
     Project the casorati matrix onto the remaining components.
 
@@ -113,20 +119,27 @@ def step4(C_tilde: np.ndarray, Z_mean: np.ndarray, eigvecs: np.ndarray, k: int) 
         np.ndarray: The projected casorati matrix.
     """
     for i in range(C_tilde.shape[0]):
-        C_tilde[i] = np.sum(
-            [
-                np.dot(
-                    C_tilde[i],
-                    np.dot(eigvecs[:, ii].reshape(-1, 1), eigvecs[:, ii].reshape(1, -1))
-                )
-                for ii in range(k)
-            ],
-            axis=0
-        ) + Z_mean
+        C_tilde[i] = (
+            np.sum(
+                [
+                    np.dot(
+                        C_tilde[i],
+                        np.dot(
+                            eigvecs[:, ii].reshape(-1, 1), eigvecs[:, ii].reshape(1, -1)
+                        ),
+                    )
+                    for ii in range(k)
+                ],
+                axis=0,
+            )
+            + Z_mean
+        )
     return C_tilde
 
 
-def step5(C_tilde: np.ndarray, img: np.ndarray, mask: Optional[np.ndarray]) -> np.ndarray:
+def step5(
+    C_tilde: np.ndarray, img: np.ndarray, mask: Optional[np.ndarray]
+) -> np.ndarray:
     """
     Convert the casorati matrix back to the 2D image format.
 

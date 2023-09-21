@@ -4,8 +4,13 @@ import numpy as np
 from numba import jit
 
 
-def nlm_CEST(images: np.ndarray, big_window_size: int, small_window_size: int,
-             multi_processing: bool = False, pools: int = 5) -> np.ndarray:
+def nlm_CEST(
+    images: np.ndarray,
+    big_window_size: int,
+    small_window_size: int,
+    multi_processing: bool = False,
+    pools: int = 5,
+) -> np.ndarray:
     """
     Perform Non-Local Means (NLM) denoising on CEST images.
 
@@ -24,12 +29,21 @@ def nlm_CEST(images: np.ndarray, big_window_size: int, small_window_size: int,
 
     if not multi_processing:
         for dyn in range(images.shape[-1]):
-            images[:, :, dyn] = nlm(images[:, :, dyn], big_window_size, small_window_size)
+            images[:, :, dyn] = nlm(
+                images[:, :, dyn], big_window_size, small_window_size
+            )
     else:
         with Pool(pools) as p:
-            res = [result for result in p.imap_unordered(run_ml,
-                                                         [(images[:, :, dyn], big_window_size, small_window_size, dyn)
-                                                          for dyn in range(images.shape[-1])])]
+            res = [
+                result
+                for result in p.imap_unordered(
+                    run_ml,
+                    [
+                        (images[:, :, dyn], big_window_size, small_window_size, dyn)
+                        for dyn in range(images.shape[-1])
+                    ],
+                )
+            ]
         for d_img, dyn in res:
             images[:, :, dyn] = d_img
 
@@ -81,18 +95,30 @@ def nlm(image: np.ndarray, big_window_size: int, small_window_size: int) -> np.n
             org_img_y_pixel = image_y - pad_width
             new_pixel_value, norm_factor = 0, 0
 
-            comp_nbhd = get_comparison_neighborhood(padded_image, image_x, image_y, search_width)
+            comp_nbhd = get_comparison_neighborhood(
+                padded_image, image_x, image_y, search_width
+            )
 
-            for small_window_x in range(org_img_x_pixel,
-                                        org_img_x_pixel + big_window_size - small_window_size + 1):
-                for small_window_y in range(org_img_y_pixel,
-                                            org_img_y_pixel + big_window_size - small_window_size + 1):
-                    small_nbhd = get_small_neighborhood(padded_image, small_window_x, small_window_y, small_window_size)
+            for small_window_x in range(
+                org_img_x_pixel,
+                org_img_x_pixel + big_window_size - small_window_size + 1,
+            ):
+                for small_window_y in range(
+                    org_img_y_pixel,
+                    org_img_y_pixel + big_window_size - small_window_size + 1,
+                ):
+                    small_nbhd = get_small_neighborhood(
+                        padded_image, small_window_x, small_window_y, small_window_size
+                    )
                     euclidean_distance = np.linalg.norm(small_nbhd - comp_nbhd)
                     weight = np.exp(-euclidean_distance)
                     norm_factor += weight
-                    new_pixel_value += weight * padded_image[
-                        small_window_y + search_width, small_window_x + search_width]
+                    new_pixel_value += (
+                        weight
+                        * padded_image[
+                            small_window_y + search_width, small_window_x + search_width
+                        ]
+                    )
 
             image[org_img_y_pixel, org_img_x_pixel] = new_pixel_value / norm_factor
 
@@ -113,13 +139,19 @@ def pad_image(image: np.ndarray, big_window_size: int, pad_width: int) -> np.nda
         np.ndarray: The padded image.
     """
     # Creating a new zeroed (padded) image
-    padded_image = np.zeros((image.shape[0] + big_window_size, image.shape[1] + big_window_size))
-    padded_image[pad_width:pad_width + image.shape[0], pad_width:pad_width + image.shape[1]] = image
+    padded_image = np.zeros(
+        (image.shape[0] + big_window_size, image.shape[1] + big_window_size)
+    )
+    padded_image[
+        pad_width : pad_width + image.shape[0], pad_width : pad_width + image.shape[1]
+    ] = image
     return padded_image
 
 
 @jit(nopython=True)
-def get_comparison_neighborhood(padded_image: np.ndarray, x: int, y: int, search_width: int) -> np.ndarray:
+def get_comparison_neighborhood(
+    padded_image: np.ndarray, x: int, y: int, search_width: int
+) -> np.ndarray:
     """
     Extract the comparison neighborhood from the padded image.
 
@@ -132,11 +164,15 @@ def get_comparison_neighborhood(padded_image: np.ndarray, x: int, y: int, search
     Returns:
         np.ndarray: The comparison neighborhood.
     """
-    return padded_image[y - search_width:y + search_width + 1, x - search_width:x + search_width + 1]
+    return padded_image[
+        y - search_width : y + search_width + 1, x - search_width : x + search_width + 1
+    ]
 
 
 @jit(nopython=True)
-def get_small_neighborhood(padded_image: np.ndarray, x: int, y: int, small_window_size: int) -> np.ndarray:
+def get_small_neighborhood(
+    padded_image: np.ndarray, x: int, y: int, small_window_size: int
+) -> np.ndarray:
     """
     Extract a small neighborhood from the padded image.
 
@@ -149,4 +185,4 @@ def get_small_neighborhood(padded_image: np.ndarray, x: int, y: int, small_windo
     Returns:
         np.ndarray: The extracted small neighborhood.
     """
-    return padded_image[y:y + small_window_size, x:x + small_window_size]
+    return padded_image[y : y + small_window_size, x : x + small_window_size]
