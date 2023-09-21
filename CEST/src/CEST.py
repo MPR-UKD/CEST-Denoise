@@ -5,14 +5,16 @@ from CEST.src.cest_correction import cest_correction
 
 
 class CEST:
-    def __init__(self,
-                 cest_data: np.ndarray,
-                 wassr_data: np.ndarray,
-                 mask: np.ndarray,
-                 cest_range: float,
-                 wassr_range: float,
-                 interpolation_step: float,
-                 max_wassr_offset: float):
+    def __init__(
+        self,
+        cest_data: np.ndarray,
+        wassr_data: np.ndarray,
+        mask: np.ndarray,
+        cest_range: float,
+        wassr_range: float,
+        interpolation_step: float,
+        max_wassr_offset: float,
+    ):
         """
         Initialize CEST object.
 
@@ -47,7 +49,9 @@ class CEST:
 
     def _perform_wassr_correction(self):
         """Perform WASSR correction on the data."""
-        wassr_instance = WASSR(max_offset=self.config["max_wassr_offset"], ppm=self.config["wassr_range"])
+        wassr_instance = WASSR(
+            max_offset=self.config["max_wassr_offset"], ppm=self.config["wassr_range"]
+        )
         self.offset_map, self.mask = wassr_instance.calculate(
             wassr=self.wassr_data,
             mask=self.mask,
@@ -67,11 +71,16 @@ class CEST:
 
         dyn = self.cest_data.shape[-1]
         step_size = (self.config["cest_range"] * 2) / (dyn - 1)
-        x = np.arange(-self.config["cest_range"], self.config["cest_range"], step_size).transpose()
+        x = np.arange(
+            -self.config["cest_range"], self.config["cest_range"], step_size
+        ).transpose()
         x = np.append(x, self.config["cest_range"])
 
-        x_itp = np.arange(-self.config["cest_range"], self.config["cest_range"],
-                          self.config["interpolation_step"]).transpose()
+        x_itp = np.arange(
+            -self.config["cest_range"],
+            self.config["cest_range"],
+            self.config["interpolation_step"],
+        ).transpose()
         x_itp = np.append(x_itp, self.config["cest_range"])
 
         corrected_cest_curve, x_calcentires = cest_correction(

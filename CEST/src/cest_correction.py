@@ -3,14 +3,16 @@ import numpy as np
 from CEST.src import matlab_style_functions
 
 
-def cest_correction(cest_array: np.ndarray,
-                    x_calcentires: np.ndarray,
-                    x: np.ndarray,
-                    x_itp: np.ndarray,
-                    mask: np.ndarray,
-                    offset_map: np.ndarray,
-                    interpolation: str,
-                    cest_range: float) -> tuple:
+def cest_correction(
+    cest_array: np.ndarray,
+    x_calcentires: np.ndarray,
+    x: np.ndarray,
+    x_itp: np.ndarray,
+    mask: np.ndarray,
+    offset_map: np.ndarray,
+    interpolation: str,
+    cest_range: float,
+) -> tuple:
     """
     Correct the CEST data.
 
@@ -35,13 +37,21 @@ def cest_correction(cest_array: np.ndarray,
     for i, j in arguments:
         values = cest_array[i, j, :]
         offset = offset_map[i, j]
-        CestCurveS[i, j, :] = calc_pixel(cest_range, values, offset, x_itp, x, interpolation)
+        CestCurveS[i, j, :] = calc_pixel(
+            cest_range, values, offset, x_itp, x, interpolation
+        )
 
     return CestCurveS, x_calcentires
 
 
-def calc_pixel(cest_range: float, y_values: np.ndarray, offset: float,
-               x_itp: np.ndarray, x: np.ndarray, interpolation: str) -> np.ndarray:
+def calc_pixel(
+    cest_range: float,
+    y_values: np.ndarray,
+    offset: float,
+    x_itp: np.ndarray,
+    x: np.ndarray,
+    interpolation: str,
+) -> np.ndarray:
     """
     Correct the CEST data for a single pixel.
 
@@ -63,5 +73,5 @@ def calc_pixel(cest_range: float, y_values: np.ndarray, offset: float,
     ind_sC_1 = np.argmin(vind_sC_1)
     ind_sC_2 = np.argmin(vind_sC_2)
 
-    y_calcentries = y_itp[ind_sC_1:ind_sC_2 + 1]
+    y_calcentries = y_itp[ind_sC_1 : ind_sC_2 + 1]
     return y_calcentries

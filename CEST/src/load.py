@@ -5,8 +5,9 @@ import nibabel as nib
 import numpy as np
 
 
-def load_norm_cest_data(cest_file: Union[Path, str],
-                        mask_file: Union[Path, str, None] = None) -> Tuple[np.ndarray, np.ndarray]:
+def load_norm_cest_data(
+    cest_file: Union[Path, str], mask_file: Union[Path, str, None] = None
+) -> Tuple[np.ndarray, np.ndarray]:
     """
     Load and normalize CEST data from the given file paths.
 

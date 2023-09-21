@@ -87,9 +87,8 @@ def calc_offset(
         x_interp_mirror,
         y_interp,
     )
-    # OF = msa2(x_interp_neu, y_interp_neu, x_interp_mirror, y_interp, self.maxShift, self.maxOffset, self.hStep)
     if abs(OF) > max_shift:
-        return 0
+        return -100
     return OF
 
 
