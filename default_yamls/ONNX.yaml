@@ -1,0 +1,2 @@
+# Configuration parameters for the ONNX denoising algorithm
+mode: CEST  # only CEST implemented
