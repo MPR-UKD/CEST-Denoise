@@ -1,24 +1,30 @@
 import itertools
-
-import matplotlib.pyplot as plt
-
-from .support_function import *
 from typing import Tuple
 
-# ==================================================================================================
-#                                         Basic estimate
-# ==================================================================================================
+import matplotlib.pyplot as plt
+import numpy as np
+
+from .support_function import *
 
 
 def step1_basic_estimation(
-    noisy_img: np.ndarray, param: tuple, mask: np.ndarray, verbose: bool = False
-):
+    noisy_img: np.ndarray,
+    param: Tuple[int, int, int, int, float, float, float, float, str],
+    mask: np.ndarray,
+    verbose: bool = False,
+) -> np.ndarray:
     """
-    Implementation of the first step of BM3D, which provides a base estimation of the image without noise
-    after grouping, collaborative filtering and aggregation.
+    Implementation of the first step of BM3D, which provides a basic estimation of the image
+    without noise after grouping, collaborative filtering, and aggregation.
 
-    Return:
-        basic_estimate_img
+    Args:
+        noisy_img (np.ndarray): Noisy input image.
+        param (Tuple): Parameters for the BM3D algorithm.
+        mask (np.ndarray): Mask applied on the image.
+        verbose (bool, optional): If True, print additional information. Defaults to False.
+
+    Returns:
+        np.ndarray: Basic estimate of the denoised image.
     """
     # convert param to function variables
     assert len(param) == 9
@@ -108,15 +114,27 @@ def step1_basic_estimation(
 
 def grouping(
     noisy_image: np.ndarray,
-    ref_block_position: tuple,
+    ref_block_position: Tuple[int, int],
     discrete_transform_blocks: np.ndarray,
     block_size: int,
     threshold_distance: int,
     max_number_of_similar_blocks: int,
     window_size: int,
-) -> tuple[np.ndarray, np.ndarray]:
+) -> Tuple[np.ndarray, np.ndarray]:
     """
-    find similar block in the noisy image based on the blocks after discrete transformation
+    Find similar blocks in the noisy image based on the blocks after discrete transformation.
+
+    Args:
+        noisy_image (np.ndarray): Noisy image.
+        ref_block_position (Tuple[int, int]): Position of the reference block.
+        discrete_transform_blocks (np.ndarray): Blocks after discrete transformation.
+        block_size (int): Size of each block.
+        threshold_distance (int): Threshold for block similarity.
+        max_number_of_similar_blocks (int): Maximum number of similar blocks to consider.
+        window_size (int): Size of the search window.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: Positions of similar blocks and the blocks themselves.
     """
 
     # calculate search_window (np.array([[x1,y1],[x2,y2]])
@@ -181,6 +199,14 @@ def filtering_3d(
     """
     Perform collaborative hard-thresholding on the block group, which includes 3D transform,
     noise attenuation through hard-thresholding, and inverse 3D transform.
+
+    Args:
+        block_group (np.ndarray): Group of blocks.
+        threshold (float): Threshold for hard-thresholding.
+        mode (str): Mode for the discrete transform, either "cos" or "sin".
+
+    Returns:
+        Tuple[np.ndarray, int]: Filtered block group and the count of non-zero elements.
     """
     count = 0  # Counter for the number of non-zero elements in the transformed blocks
 
@@ -225,6 +251,22 @@ def aggregation(
     sigma: float,  # Standard deviation of the noise
     mode: str,  # Mode for the discrete transform, either "cos" or "sin"
 ):
+    """
+    Aggregate the blocks to produce the basic estimate of the denoised image.
+
+    Args:
+        block_group (np.ndarray): Group of blocks.
+        block_positions (np.ndarray): Positions of the blocks in the image.
+        basic_estimate_img (np.ndarray): Array to store the basic estimate image.
+        basic_weight (np.ndarray): Weights for each pixel in the basic estimate image.
+        basicKaiser (np.ndarray): Kaiser window weights.
+        nonzero_cnt (int): Number of non-zero blocks in the block group.
+        sigma (float): Standard deviation of the noise.
+        mode (str): Mode for the discrete transform, either "cos" or "sin".
+
+    Returns:
+        None
+    """
     # If there are no non-zero blocks, use the full block weight
     if nonzero_cnt < 1:
         block_weight = 1.0 * basicKaiser
