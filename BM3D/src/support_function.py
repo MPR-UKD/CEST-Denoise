@@ -3,17 +3,23 @@ from numba import jit
 from scipy.fftpack import dct, idct, dst, idst
 
 
-def initialization(Img: np.ndarray, BlockSize: int, Kaiser_Window_beta: float):
+def initialization(
+    Img: np.ndarray, BlockSize: int, Kaiser_Window_beta: float
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    :param Img: numpy image with shape n x m
-    :param BlockSize: integer
-    :param Kaiser_Window_beta: float - The $\beta$ parameter of the Kaiser window provides a convenient continuous
-        control over the fundamental window trade-off between side-lobe level and main-lobe width.
-        Larger $\beta$ values give lower side-lobe levels, but at the price of a wider main lobe.
+    Initialize images and generate the Kaiser window for BM3D filtering.
 
-    :return: init_img (zero image with shape n x m),
-             init_weights (zero image with shape BlockSize x BlockSize),
-             init_kaiser_window (kaiser window with shape BlockSize x BlockSize)
+    Args:
+        Img (np.ndarray): Input image of shape [n, m].
+        BlockSize (int): Size of the block for processing.
+        Kaiser_Window_beta (float): The beta parameter of the Kaiser window that controls the trade-off
+            between side-lobe level and main-lobe width.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]:
+            - Zero image with shape [n, m]
+            - Zero image with shape [BlockSize, BlockSize]
+            - Kaiser window with shape [BlockSize, BlockSize]
     """
     # create zero image with shape n x m
     init_img = np.zeros(Img.shape, dtype=float)
@@ -29,14 +35,14 @@ def initialization(Img: np.ndarray, BlockSize: int, Kaiser_Window_beta: float):
 
 def compute_distance_of_two_blocks(block_1: np.ndarray, block_2: np.ndarray) -> float:
     """
-    Compute the distance of two arrays after discrete transformation
+    Compute the squared Euclidean distance between two blocks.
 
-    Parameters:
-        block_1 (numpy.ndarray): numpy array representing the first block
-        block_2 (numpy.ndarray): numpy array representing the second block
+    Args:
+        block_1 (np.ndarray): First block.
+        block_2 (np.ndarray): Second block.
 
     Returns:
-        float: distance between the two blocks after performing a discrete transformation on them
+        float: Distance between the two blocks.
     """
     # calculate the norm of the difference between the two blocks, squared, and divide by the square of the shape of
     # the blocks
@@ -46,8 +52,20 @@ def compute_distance_of_two_blocks(block_1: np.ndarray, block_2: np.ndarray) -> 
 
 @jit(nopython=True)
 def find_search_window(
-    Img: np.ndarray, RefPoint: tuple, BlockSize: int, WindowSize: int
-):
+    Img: np.ndarray, RefPoint: Tuple[int, int], BlockSize: int, WindowSize: int
+) -> np.ndarray:
+    """
+    Determine the coordinates of the search window given a reference point.
+
+    Args:
+        Img (np.ndarray): Input image.
+        RefPoint (Tuple[int, int]): Reference point coordinates.
+        BlockSize (int): Size of the block for processing.
+        WindowSize (int): Desired size of the search window.
+
+    Returns:
+        np.ndarray: Coordinates of the search window.
+    """
     # Initialize an array to store the top-left and bottom-right coordinates of the search window
     window_location = np.zeros((2, 2), dtype="int16")
 
@@ -87,8 +105,15 @@ def discrete_2D_transformation(
     image: np.ndarray, BlockSize: int, mode: str
 ) -> np.ndarray:
     """
-    Do discrete cosine / sinus transform (2D transform) for each block in image to reduce the complexity of
-    applying transforms
+    Perform a 2D discrete transformation (either cosine or sine) on each block of an image.
+
+    Args:
+        image (np.ndarray): Input image.
+        BlockSize (int): Size of the block for processing.
+        mode (str): Transformation mode, either "cos" for cosine or "sin" for sine.
+
+    Returns:
+        np.ndarray: Transformed blocks.
     """
 
     # Initialize a 4D array to store the transformed blocks
@@ -120,27 +145,51 @@ def discrete_2D_transformation(
 
 def dct2D(array: np.ndarray) -> np.ndarray:
     """
-    2D discrete cosine transform (DCT)
+    Compute the 2D Discrete Cosine Transform of an array.
+
+    Args:
+        array (np.ndarray): Input 2D array.
+
+    Returns:
+        np.ndarray: Array after 2D DCT.
     """
     return dct(dct(array, axis=0, norm="ortho"), axis=1, norm="ortho")
 
 
 def idct2D(array: np.ndarray) -> np.ndarray:
     """
-    inverse 2D discrete cosine transform
+    Compute the inverse 2D Discrete Cosine Transform of an array.
+
+    Args:
+        array (np.ndarray): Input 2D array.
+
+    Returns:
+        np.ndarray: Array after inverse 2D DCT.
     """
     return idct(idct(array, axis=0, norm="ortho"), axis=1, norm="ortho")
 
 
 def dst2D(array: np.ndarray) -> np.ndarray:
     """
-    2D discrete sinus transform (DCT)
+    Compute the 2D Discrete Sine Transform of an array.
+
+    Args:
+        array (np.ndarray): Input 2D array.
+
+    Returns:
+        np.ndarray: Array after 2D DST.
     """
     return dst(dst(array, axis=0, norm="ortho"), axis=1, norm="ortho")
 
 
 def idst2D(array: np.ndarray) -> np.ndarray:
     """
-    inverse 2D discrete sinus transform
+    Compute the inverse 2D Discrete Sine Transform of an array.
+
+    Args:
+        array (np.ndarray): Input 2D array.
+
+    Returns:
+        np.ndarray: Array after inverse 2D DST.
     """
     return idst(idst(array, axis=0, norm="ortho"), axis=1, norm="ortho")
