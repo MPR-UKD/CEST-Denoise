@@ -1,4 +1,6 @@
 import numpy as np
+import pytest
+
 from Metrics.src.image_quality_estimation import IQS
 from NLM.src.denoise import (
     nlm,
@@ -7,7 +9,6 @@ from NLM.src.denoise import (
     get_comparison_neighborhood,
     get_small_neighborhood,
 )
-import pytest
 from test_support_function.src.CEST import generate_Z_3D
 
 
@@ -42,9 +43,9 @@ def test_get_comparison_neighborhood():
 
 
 def test_get_small_neighborhood():
-    padded_image = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
-    small_neighborhood = get_small_neighborhood(padded_image, 0, 0, 1)
-    expected_small_neighborhood = np.array([[1, 2], [4, 5]])
+    padded_image = np.array([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]])
+    small_neighborhood = get_small_neighborhood(padded_image, 0, 0, 3)
+    expected_small_neighborhood = np.array([[1, 2, 3], [5, 6, 7], [9, 10, 11]])
     np.testing.assert_equal(small_neighborhood, expected_small_neighborhood)
 
 
