@@ -1,9 +1,9 @@
 import numpy as np
+import pytest
 
 from CEST.src.CEST import CEST
-from test_support_function.src.CEST import generate_Z_3D
-import pytest
 from Metrics.src.CEST import mtr_asym
+from test_support_function.src.CEST import generate_Z_3D
 
 
 def test_OF_0():
@@ -14,12 +14,12 @@ def test_OF_0():
     ) + generate_Z_3D(img_size=(2, 2), dyn=41, ppm=4, a=0.2, b=2, c=0.5)
     cest_img -= cest_img.min()
     cest = CEST(
-        cest=cest_img,
-        wassr=wassr_img,
+        cest_data=cest_img,
+        wassr_data=wassr_img,
         mask=np.ones((2, 2)),
         cest_range=4,
         wassr_range=1,
-        itp_step=0.05,
+        interpolation_step=0.05,
         max_wassr_offset=1,
     )
     CestCurveS, x_calcentires = cest.run()
@@ -39,12 +39,12 @@ def test_OF_0_5():
     ) + generate_Z_3D(img_size=(2, 2), dyn=41, ppm=4, a=0.2, b=2, c=0.5)
     cest_img -= cest_img.min()
     cest = CEST(
-        cest=cest_img,
-        wassr=wassr_img,
+        cest_data=cest_img,
+        wassr_data=wassr_img,
         mask=np.ones((2, 2)),
         cest_range=4,
         wassr_range=1,
-        itp_step=0.05,
+        interpolation_step=0.05,
         max_wassr_offset=1,
     )
     CestCurveS, x_calcentires = cest.run()
