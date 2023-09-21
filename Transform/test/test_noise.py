@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 from Transform.src.noise import Noiser
 
 
@@ -42,7 +43,7 @@ def test_get_white_noise():
     # Test if the get_white_noise function correctly generates white noise with the given shape and sigma value
     noiser = Noiser(sigma=0.1)
 
-    noise = noiser.get_white_noise((10, 10), 0.5)
+    noise = noiser.add_noise_in_k_space((10, 10), 0.5)
     assert noise.shape == (10, 10)
     assert np.abs(noise.std() - 0.5) < 1e-6
 
