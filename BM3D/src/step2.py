@@ -1,20 +1,31 @@
+import itertools
+from typing import Tuple
+
 import numpy as np
 from matplotlib import pyplot as plt
+
 from .support_function import *
-import itertools
 
 
 def step2_final_estimation(
-    basic_estimate_img: np.ndarray,  # 2D array of the basic estimate image
-    noisy_image: np.ndarray,  # 2D array of the noisy image
-    param: tuple,  # Tuple of hyperparameters for BM3D
-    mask: np.ndarray,  # 2D array of the mask for the image
-    verbose: bool = False,  # Flag for verbosity
+    basic_estimate_img: np.ndarray,
+    noisy_image: np.ndarray,
+    param: tuple,
+    mask: np.ndarray,
+    verbose: bool = False,
 ) -> np.ndarray:
     """
-    Give the final estimate after grouping, Wiener filtering and aggregation
-    Return:
-        final estimate finalImg
+    Provides the final estimation of the image after grouping, Wiener filtering, and aggregation.
+
+    Args:
+        basic_estimate_img (np.ndarray): Basic estimation of the image.
+        noisy_image (np.ndarray): Original noisy image.
+        param (tuple): Hyperparameters for the BM3D algorithm.
+        mask (np.ndarray): Mask for the image.
+        verbose (bool, optional): Whether to print verbose outputs. Defaults to False.
+
+    Returns:
+        np.ndarray: Final estimation of the image.
     """
 
     # Unpack the hyperparameters from the param tuple
@@ -108,9 +119,25 @@ def grouping(
     window_size: int,
     discrete_transform_blocks_basic: np.ndarray,
     discrete_transform_blocks_noisy: np.ndarray,
-):
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
-    find similar blocks in the estimated image based on the blocks after discrete transformation
+    Finds similar blocks in the estimated image based on the blocks after discrete transformation.
+
+    Args:
+        basic_estimate_image (np.ndarray): Basic estimated image.
+        ref_block_position (tuple): Reference block position.
+        block_size (int): Size of the block.
+        threshold_distance (int): Threshold distance for grouping.
+        max_number_of_similar_blocks (int): Maximum number of similar blocks to consider.
+        window_size (int): Size of the search window.
+        discrete_transform_blocks_basic (np.ndarray): Discrete transformed blocks of the basic estimated image.
+        discrete_transform_blocks_noisy (np.ndarray): Discrete transformed blocks of the noisy image.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray]:
+            - Positions of the blocks.
+            - Grouped blocks from the basic estimated image.
+            - Grouped blocks from the noisy image.
     """
 
     # calculate search_window (np.array([[x1,y1],[x2,y2]])
@@ -187,10 +214,20 @@ def filtering_3D(
     block_groups_noisy: np.ndarray,
     sigma: float,
     mode: str,
-):
+) -> Tuple[np.ndarray, float]:
     """
-    Do collaborative Wiener filtering and here we choose 2D DCT + 1D DCT as the 3D transform which
-    is the same with the 3D transform in hard-thresholding filtering
+    Performs collaborative Wiener filtering using 3D transform.
+
+    Args:
+        BlockGroup_basic (np.ndarray): Basic block group.
+        block_groups_noisy (np.ndarray): Noisy block group.
+        sigma (float): Noise level.
+        mode (str): Transformation mode, either "cos" or "sin".
+
+    Returns:
+        Tuple[np.ndarray, float]:
+            - Filtered noisy block groups.
+            - Wiener weight.
     """
 
     weight = 0
