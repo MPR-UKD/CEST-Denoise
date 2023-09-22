@@ -2,25 +2,28 @@ import argparse
 from pathlib import Path
 
 import pytorch_lightning as pl
+import torch
 from pytorch_lightning.callbacks import LearningRateMonitor, ModelCheckpoint
 
 from DeepDenoise.src.dataloader import CESTDataModule
 from DeepDenoise.src.res_unet import CESTResUNet
 from DeepDenoise.src.unet import CESTUnet
-import torch
 
 
-def save_onnx_model(model, save_path="model.onnx"):
+def save_onnx_model(model: torch.nn.Module, save_path: str = "model.onnx") -> None:
     """
     Save the PyTorch model in ONNX format.
 
     Args:
-        model (torch.nn.Module): PyTorch model.
-        save_path (str): Path to save the ONNX model.
+        model (torch.nn.Module): The model to be saved.
+        save_path (str, optional): The location where the model should be saved.
     """
+    # Create dummy input tensor with the same input shape as the model expects
     dummy_input = torch.randn(
         1, model.input_shape[0], model.input_shape[1], model.input_shape[2]
     )
+
+    # Export model in ONNX format
     torch.onnx.export(model, dummy_input, save_path)
     print(f"Model saved in ONNX format at {save_path}")
 
@@ -30,10 +33,12 @@ def main(args: argparse.Namespace) -> None:
     Main function to train and test the model.
 
     Args:
-        args (argparse.Namespace): Command line arguments.
+        args (argparse.Namespace): Parsed command line arguments containing model training parameters.
     """
-    # Instantiate the model
+    # Select the model class based on the chosen model type
     model_cls = CESTUnet if args.model == "unet" else CESTResUNet
+
+    # Instantiate the model with the provided parameters
     model = model_cls(
         input_shape=(args.dyn, 128, 128),
         depth=args.depth,
@@ -41,7 +46,7 @@ def main(args: argparse.Namespace) -> None:
         noise_estimation=args.noise_estimation,
     )
 
-    # Instantiate the data module
+    # Instantiate the data module with the provided parameters
     data_module = CESTDataModule(
         dir=args.data_dir,
         batch_size=args.batch_size,
@@ -50,10 +55,11 @@ def main(args: argparse.Namespace) -> None:
         dyn=args.dyn,
     )
 
-    # Define callbacks
+    # Define callbacks for learning rate monitoring and model checkpointing
     lr_monitor = LearningRateMonitor(logging_interval="step")
-    filename = f"{args.model}-lr={args.learning_rate}-noise_estimation={'yes' if args.noise_estimation else 'no'}-best_model"
 
+    # Filename for saving the best model's checkpoint
+    filename = f"{args.model}-lr={args.learning_rate}-noise_estimation={'yes' if args.noise_estimation else 'no'}-best_model"
     checkpoint_callback = ModelCheckpoint(
         dirpath=Path(args.checkpoint_dir) / args.model,
         filename=filename,
@@ -62,21 +68,17 @@ def main(args: argparse.Namespace) -> None:
         save_top_k=1,  # Save only the best model
     )
 
-    # Instantiate the trainer
-    cuda = True if args.gpus != 0 else False
-    devices = [_ for _ in range(args.gpus)]
-
+    # Define the device and strategy for model training
     trainer = pl.Trainer(
-        accelerator="cuda" if cuda else "cpu",
-        devices=devices if cuda else 1,
-        strategy="auto",
+        accelerator="gpu" if args.gpus > 0 else "cpu",
+        gpus=args.gpus if args.gpus > 0 else None,
         max_epochs=args.max_epochs,
         callbacks=[lr_monitor, checkpoint_callback],
         log_every_n_steps=1,
         check_val_every_n_epoch=1,
     )
 
-    # Train and test the model
+    # Train and test the model using the trainer
     trainer.fit(model, data_module)
     trainer.test(model, data_module.test_dataloader())
 
@@ -90,6 +92,7 @@ def main(args: argparse.Namespace) -> None:
         noise_estimation=args.noise_estimation,
     )
 
+    # Save the optimized model
     save_onnx_model(
         best_model, Path(args.checkpoint_dir) / args.model / (filename + ".onnx")
     )
