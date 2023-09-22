@@ -1,18 +1,20 @@
-import pytorch_lightning as pl
 from pathlib import Path
-from torch.utils.data import DataLoader
-from DeepDenoise.src.dataset import CESTDataset
 from typing import Callable, Union, List, Optional
+
+import pytorch_lightning as pl
+from torch.utils.data import DataLoader
+
+from DeepDenoise.src.dataset import CESTDataset
 
 
 def get_dataset(
     dir: Union[str, Path],
     mode: str,
-    distribution: Optional[List[float]],
-    noise_std: float,
-    transform: Optional[Callable],
-    dyn: int,
-    variable_sigma: bool = False,
+    distribution: Optional[List[float]] = None,
+    noise_std: float = 0.1,
+    transform: Optional[Callable] = None,
+    dyn: int = 42,
+    variable_sigma: bool = False
 ) -> CESTDataset:
     """
     Create and return a CESTDataset.
@@ -24,6 +26,7 @@ def get_dataset(
         noise_std (float): Standard deviation of the noise to add.
         transform (Optional[Callable]): Optional transformation to apply to the data.
         dyn (int): Number of offset frequencies in the Z-spectrum.
+        variable_sigma (bool, optional): Whether to use a variable sigma for noise addition. Defaults to False.
 
     Returns:
         CESTDataset: The created dataset.
@@ -40,6 +43,8 @@ def get_dataset(
 
 
 class CESTDataModule(pl.LightningDataModule):
+    """DataModule for PyTorch Lightning to organize all data loading and processing."""
+
     def __init__(
         self,
         dir: Union[str, Path],
@@ -64,15 +69,9 @@ class CESTDataModule(pl.LightningDataModule):
         """
         super().__init__()
         self.dir = dir
-        self.train_dataset = get_dataset(
-            dir, "train", distribution, noise_std + 0.05, transform, dyn, True
-        )
-        self.val_dataset = get_dataset(
-            dir, "val", distribution, noise_std, transform, dyn, True
-        )
-        self.test_dataset = get_dataset(
-            dir, "test", distribution, noise_std, transform, dyn
-        )
+        self.train_dataset = get_dataset(dir, "train", distribution, noise_std + 0.05, transform, dyn, True)
+        self.val_dataset = get_dataset(dir, "val", distribution, noise_std, transform, dyn, True)
+        self.test_dataset = get_dataset(dir, "test", distribution, noise_std, transform, dyn)
         self.batch_size = batch_size
         self.workers = workers
 
@@ -88,11 +87,15 @@ class CESTDataModule(pl.LightningDataModule):
     def val_dataloader(self) -> DataLoader:
         """Return a DataLoader for the validation dataset."""
         return DataLoader(
-            self.val_dataset, batch_size=self.batch_size, num_workers=self.workers
+            self.val_dataset,
+            batch_size=self.batch_size,
+            num_workers=self.workers,
         )
 
     def test_dataloader(self) -> DataLoader:
         """Return a DataLoader for the testing dataset."""
         return DataLoader(
-            self.test_dataset, batch_size=self.batch_size, num_workers=self.workers
+            self.test_dataset,
+            batch_size=self.batch_size,
+            num_workers=self.workers,
         )
