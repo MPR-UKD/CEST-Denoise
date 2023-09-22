@@ -52,6 +52,7 @@ class CESTResUNet(pl.LightningModule):
         # Latent space
         self.latent_space = nn.Sequential(ResDown(features, features), ResDown(features, features))
 
+        features *= 2
         # Decoder
         self.decoder = nn.ModuleList()
         for _ in range(depth):

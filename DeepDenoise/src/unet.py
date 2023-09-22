@@ -47,6 +47,7 @@ class CESTUnet(pl.LightningModule):
         # Latent space
         self.latent_space = Down(features, features)
 
+        features*=2
         # Decoder
         self.decoder = nn.ModuleList()
         for _ in range(depth):
