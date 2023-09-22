@@ -1,37 +1,38 @@
 import random
 from pathlib import Path
-from typing import List, Dict, Union
-import numpy as np
+from typing import List, Dict, Union, Optional, Callable
+
 import nibabel as nib
+import numpy as np
 import torch
 from torch.utils.data import Dataset
-import random
+
 from Transform.src import Noiser
 
 
 class CESTDataset(Dataset):
     """A Dataset class for handling CEST MRI data."""
 
-    def __init__(
-        self,
-        root_dir: Path,
-        mode: str,
-        distribution: List[float] = None,
-        noise_std: float = 0.1,
-        transform=None,
-        dyn: int = None,
-        variable_sigma: bool = False,
-    ):
+    def __init__(self,
+                 root_dir: Path,
+                 mode: str,
+                 distribution: Optional[List[float]] = None,
+                 noise_std: float = 0.1,
+                 transform: Optional[Callable] = None,
+                 dyn: Optional[int] = None,
+                 variable_sigma: bool = False):
         """
         Initialize the CESTDataset class.
 
         Args:
             root_dir (Path): The root directory containing the .nii files.
             mode (str): The mode in which to operate, either "train", "val", or "test".
-            distribution (List[float], optional): Data distribution across training, validation, and testing. Defaults to [0.7, 0.2, 0.1].
+            distribution (List[float], optional): Data distribution across training, validation, and testing.
+                Defaults to [0.7, 0.2, 0.1].
             noise_std (float, optional): Standard deviation of the noise to add. Defaults to 0.1.
-            transform (callable, optional): Optional transformation to apply to the data.
+            transform (Callable, optional): Optional transformation to apply to the data.
             dyn (int, optional): Number of offset frequencies in the Z-spectrum.
+            variable_sigma (bool, optional): Whether to use a variable sigma for noise addition. Defaults to False.
 
         Raises:
             ValueError: If an invalid mode is provided.
@@ -51,16 +52,14 @@ class CESTDataset(Dataset):
         files = [file.absolute() for file in root_dir.glob("*.nii")]
 
         # Determine start and end indices based on mode and distribution
+        total_files = len(files)
         if mode == "train":
-            start, end = 0, int(distribution[0] * len(files))
+            start, end = 0, int(distribution[0] * total_files)
         elif mode == "val":
-            start, end = int(distribution[0] * len(files)), int(
-                distribution[0] * len(files)
-            ) + int(distribution[1] * len(files))
+            start, end = int(distribution[0] * total_files), int(
+                distribution[0] * total_files + distribution[1] * total_files)
         elif mode == "test":
-            start, end = int(distribution[0] * len(files)) + int(
-                distribution[1] * len(files)
-            ), len(files)
+            start, end = int(distribution[0] * total_files + distribution[1] * total_files), total_files
         else:
             raise ValueError(f"Invalid mode: {mode}")
 
@@ -75,10 +74,10 @@ class CESTDataset(Dataset):
         Retrieve an item from the dataset by index.
 
         Args:
-            idx (int | torch.Tensor): Index of the desired item.
+            idx (Union[int, torch.Tensor]): Index of the desired item.
 
         Returns:
-            dict[str, torch.Tensor]: Ground truth and noisy images.
+            Dict[str, torch.Tensor]: Dictionary containing ground truth and noisy images.
         """
         if torch.is_tensor(idx):
             idx = idx.tolist()
@@ -86,27 +85,22 @@ class CESTDataset(Dataset):
         img_path = self.file_list[idx]
         img = load_z(img_path, self.dyn)
 
-        noisy_img = self.noiser.add_noise(
-            img.copy(),
-            sigma=random.uniform(0, self.sigma) if self.variable_sigma else None,
-        )
+        noisy_img = self.noiser.add_noise(img.copy(),
+                                          sigma=random.uniform(0, self.sigma) if self.variable_sigma else None)
 
         # Transpose to match PyTorch's convention (C, H, W)
         sample = {
-            "ground_truth": img.transpose(2, 3, 0, 1).squeeze(),
-            "noisy": noisy_img.transpose(2, 3, 0, 1).squeeze(),
+            "ground_truth": torch.tensor(img.transpose(2, 3, 0, 1).squeeze(), dtype=torch.float32),
+            "noisy": torch.tensor(noisy_img.transpose(2, 3, 0, 1).squeeze(), dtype=torch.float32),
         }
 
         if self.transform:
             sample = self.transform(sample)
 
-        sample["ground_truth"] = torch.tensor(sample["ground_truth"]).float()
-        sample["noisy"] = torch.tensor(sample["noisy"]).float()
-
         return sample
 
 
-def load_z(img_path: Path, dyn: int = None) -> np.ndarray:
+def load_z(img_path: Path, dyn: Optional[int] = None) -> np.ndarray:
     """
     Load a CEST file and normalize it.
 
@@ -127,6 +121,6 @@ def load_z(img_path: Path, dyn: int = None) -> np.ndarray:
     # Crop the Z-spectrum if dyn is provided
     if dyn:
         first_offset = random.randint(0, img.shape[-1] - dyn)
-        img = img[:, :, :, first_offset : first_offset + dyn]
+        img = img[:, :, :, first_offset: first_offset + dyn]
 
     return img
