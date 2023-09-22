@@ -1,31 +1,32 @@
+from typing import Tuple, Dict
+
+import pytorch_lightning as pl
 import torch
 import torch.nn as nn
-import pytorch_lightning as pl
-from DeepDenoise.src.layer import DoubleConv, Down, Up, OutConv
-from Metrics.src.image_quality_estimation import check_performance
-from typing import Tuple, Dict
 from torch.optim import Adam
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 
+from DeepDenoise.src.layer import DoubleConv, Down, Up, OutConv
+from Metrics.src.image_quality_estimation import check_performance
+
 
 class CESTUnet(pl.LightningModule):
-    """U-Net architecture for CEST MRI denoising."""
+    """
+    U-Net architecture for CEST MRI denoising. It's constructed of an encoder,
+    a latent space, and a decoder. The network can also estimate noise.
+    """
 
-    def __init__(
-        self,
-        input_shape=(42, 128, 128),
-        depth: int = 4,
-        learning_rate=1e-3,
-        noise_estimation: bool = False,
-    ):
+    def __init__(self,
+                 input_shape: Tuple[int, int, int] = (42, 128, 128),
+                 depth: int = 4,
+                 learning_rate: float = 1e-3,
+                 noise_estimation: bool = False) -> None:
         """
-        Initialize the CESTUnet class.
-
         Args:
-            input_shape (Tuple[int, int, int]): Shape of the input data.
-            depth (int): Depth of the U-Net.
-            learning_rate (float): Learning rate for the optimizer.
-            noise_estimation (bool): If True, the network estimates noise.
+            input_shape (Tuple[int, int, int]): Shape of the input data (default is (42, 128, 128)).
+            depth (int): Depth of the U-Net (default is 4).
+            learning_rate (float): Learning rate for the optimizer (default is 1e-3).
+            noise_estimation (bool): If True, the network estimates noise (default is False).
         """
         super().__init__()
 
@@ -39,28 +40,35 @@ class CESTUnet(pl.LightningModule):
         in_channels = input_shape[0]
         features = 100
         self.inc = DoubleConv(in_channels, features)
-        for i in range(depth):
+        for _ in range(depth):
             self.encoder.append(Down(features, features * 2))
             features *= 2
 
         # Latent space
         self.latent_space = Down(features, features)
 
-        features *= 2
         # Decoder
         self.decoder = nn.ModuleList()
-        for i in range(depth):
-            self.decoder.append(Up(int(features), int(features / 4), True))
-            features /= 2
-        self.decoder.append(Up(int(features), int(features / 2)))
+        for _ in range(depth):
+            self.decoder.append(Up(features, features // 4, bilinear=True))
+            features //= 2
+        self.decoder.append(Up(features, features // 2))
 
-        self.output_layer = OutConv(int(features / 2), input_shape[0])
+        self.output_layer = OutConv(features // 2, input_shape[0])
 
         # Define loss function
         self.loss_fn = nn.MSELoss()
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """Forward pass of the U-Net."""
+        """
+        Forward pass of the U-Net.
+
+        Args:
+            x (torch.Tensor): Input tensor.
+
+        Returns:
+            torch.Tensor: Output tensor.
+        """
         # Move input data to the GPU
         x = x.to(self.device)
         input_img = x
@@ -83,73 +91,79 @@ class CESTUnet(pl.LightningModule):
 
         return input_img - x if self.noise_estimation else x
 
-    def training_step(
-        self, batch: Dict[str, torch.Tensor], batch_idx: int
-    ) -> torch.Tensor:
-        """Training step."""
+    def training_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
+        """
+        Performs a training step.
+
+        Args:
+            batch (Dict[str, torch.Tensor]): Batch data.
+            batch_idx (int): Batch index.
+
+        Returns:
+            torch.Tensor: Loss value.
+        """
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
         self.log("loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
         return loss
 
-    def validation_step(
-        self, batch: Dict[str, torch.Tensor], batch_idx: int
-    ) -> torch.Tensor:
-        """Validation step."""
+    def validation_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
+        """
+        Performs a validation step.
+
+        Args:
+            batch (Dict[str, torch.Tensor]): Batch data.
+            batch_idx (int): Batch index.
+
+        Returns:
+            torch.Tensor: Loss value.
+        """
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
-        performance = check_performance(y, x, y_hat)
         loss = self.loss_fn(y_hat, y)
-        self.log("val_loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
-        self.log(
-            "Val_PSNR_noisy",
-            performance["PSNR_Noisy"],
-            sync_dist=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
-        self.log(
-            "Val_PSNR_denoised",
-            performance["PSNR_DENOISED"],
-            sync_dist=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
+        performance = check_performance(y, x, y_hat)
+        self.log_metrics("val", loss, performance)
         return loss
 
     def test_step(self, batch: Dict[str, torch.Tensor], batch_idx: int) -> torch.Tensor:
-        """Test step."""
+        """
+        Performs a test step.
+
+        Args:
+            batch (Dict[str, torch.Tensor]): Batch data.
+            batch_idx (int): Batch index.
+
+        Returns:
+            torch.Tensor: Loss value.
+        """
         x, y = batch["noisy"], batch["ground_truth"]
         y_hat = self(x)
         loss = self.loss_fn(y_hat, y)
-        self.log("test_loss", loss)
         performance = check_performance(y, x, y_hat)
-        self.log(
-            "Test_PSNR_noisy",
-            performance["PSNR_Noisy"],
-            sync_dist=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
-        self.log(
-            "Test_PSNR_denoised",
-            performance["PSNR_DENOISED"],
-            sync_dist=True,
-            on_epoch=True,
-            prog_bar=True,
-        )
+        self.log_metrics("test", loss, performance)
         return loss
 
-    def configure_optimizers(self):
+    def log_metrics(self, stage: str, loss: torch.Tensor, performance: Dict[str, float]) -> None:
+        """
+        Logs metrics for the specified stage.
+
+        Args:
+            stage (str): The stage for which to log metrics (e.g., "val" or "test").
+            loss (torch.Tensor): The loss tensor.
+            performance (Dict[str, float]): Dictionary with performance metrics.
+        """
+        self.log(f"{stage}_loss", loss, sync_dist=True, on_epoch=True, prog_bar=True)
+        for metric, value in performance.items():
+            self.log(f"{stage}_PSNR_{metric.lower()}", value, sync_dist=True, on_epoch=True, prog_bar=True)
+
+    def configure_optimizers(self) -> Dict:
+        """
+        Configures the optimizer and learning rate scheduler.
+
+        Returns:
+            Dict: Dictionary with optimizer and lr_scheduler.
+        """
         optimizer = Adam(self.parameters(), lr=self.learning_rate)
-        scheduler = ReduceLROnPlateau(
-            optimizer, mode="min", factor=0.1, patience=2, verbose=True
-        )
-        return {
-            "optimizer": optimizer,
-            "lr_scheduler": {
-                "scheduler": scheduler,
-                "monitor": "val_loss",
-            },
-        }
+        scheduler = ReduceLROnPlateau(optimizer, mode="min", factor=0.1, patience=2, verbose=True)
+        return {"optimizer": optimizer, "lr_scheduler": {"scheduler": scheduler, "monitor": "val_loss"}}
