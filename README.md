@@ -1,9 +1,3 @@
-```diff
-- !!! Currently still in progress !!!
-
-*** Paper currently under review ***
-```
-
 # DeNoise
 
 [![Actions Status](https://github.com/ludgerradke/DeNoise/actions/workflows/BM3D.yml/badge.svg)](https://github.com/ludgerradke/DeNoise/actions/workflows/BM3D.yml/badge.svg)
@@ -23,6 +17,14 @@ This GitHub repository contains several Python packages that provide various fun
 - **'CEST'**: Functions for processing CEST (Chemical Exchange Saturation Transfer) data.
 - **'test_support_function'**: Support functions for testing the other packages.
 - **'Transform'**: Functions for performing image transformations.
+
+### **Related Publications:**
+Our work on CEST Denosing is detailed in our recent publication. For an in-depth understanding and insights, please refer to:
+
+- Karl Ludger Radke, Benedikt Kamp, Vibhu Adriaenssens, Julia Stabinska, Patrik Gallinnis, Hans-Jörg Wittsack, Gerald Antoch, and Anja Müller-Lutz. "Deep Learning-Based Denoising of CEST MR Data: A Feasibility Study on Applying Synthetic Phantoms in Medical Imaging." Diagnostics 2023, 13(21), 3326. DOI: [https://doi.org/10.3390/diagnostics13213326](https://doi.org/10.3390/diagnostics13213326)
+
+***If you utilize the code or data provided in this repository, please cite our work in your publications. This will help in acknowledging our efforts and supporting the open science movement.***
+
 
 ## Installation
 
